@@ -69,6 +69,11 @@ app.use('/api/notifications', notificationRoutes);
 const clientPath = path.resolve(__dirname, '../client');
 app.use(express.static(clientPath));
 
+// Serve homepage explicitly
+app.get('/', (req, res) => {
+  res.sendFile(path.join(clientPath, 'index.html'));
+});
+
 // Fallback for API 404
 app.use('/api', (req, res) => {
   res.status(404).json({
