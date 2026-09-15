@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile - LET ME DRIVE</title>
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container navbar-container">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">🚘</div>
+        <span>LET ME DRIVE</span>
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="/drivers.html" class="nav-link">Find Drivers</a></li>
+        <li><a href="/jobs.html" class="nav-link">Browse Jobs</a></li>
+        <li><a href="/profile.html" class="nav-link active">Profile</a></li>
+      </ul>
+      <div class="nav-auth" id="navAuth"></div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container" style="max-width: 780px;">
+      <div class="card" style="padding: 32px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+          <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--secondary);">Profile & Account Settings</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 2px;">Manage your contact, location, and driving credentials</p>
+          </div>
+          <span class="badge badge-primary" id="roleBadge" style="font-size: 0.85rem; padding: 6px 14px;">Role</span>
+        </div>
+
+        <form id="profileForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="profName">Full Name *</label>
+              <input type="text" id="profName" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="profEmail">Email (Read Only)</label>
+              <input type="email" id="profEmail" class="form-control" disabled style="background: #f1f5f9;" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="profPhone">Phone Number *</label>
+              <input type="tel" id="profPhone" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="profAge">Age</label>
+              <input type="number" id="profAge" class="form-control" min="18" max="80" />
+            </div>
+          </div>
+
+          <!-- Location Section with GPS Detect -->
+          <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin: 10px 0 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+              <strong style="font-size: 0.95rem; color: var(--secondary);">📍 Location & City Settings</strong>
+              <button type="button" class="btn-current-location" id="btnProfileLocation" title="Detect your current city and GPS coordinates">
+                📍 Use My Current Location
+              </button>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="profCity">City *</label>
+                <input type="text" id="profCity" class="form-control" placeholder="Search Indian cities (e.g. Amravati, Pune, Nagpur)..." required autocomplete="off" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profArea">Area / Neighbourhood</label>
+                <input type="text" id="profArea" class="form-control" placeholder="e.g. Kothrud, Baner" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profState">State</label>
+                <input type="text" id="profState" class="form-control" placeholder="e.g. Maharashtra" />
+              </div>
+            </div>
+
+            <input type="hidden" id="profLat" />
+            <input type="hidden" id="profLng" />
+            <div id="profLocationStatus" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px;"></div>
+            <div id="gpsStatusText" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
+              Coordinates assist in precise distance calculations for AI matching.
+            </div>
+          </div>
+
+          <!-- Driver Specific Fields -->
+          <div id="driverProfileFields" style="display: none;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">
+              Professional Driver Profile
+            </h3>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="profLicenseNo">License Number</label>
+                <input type="text" id="profLicenseNo" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profLicenseType">License Category</label>
+                <select id="profLicenseType" class="form-select">
+                  <option value="LMV">LMV (Light Motor Vehicle)</option>
+                  <option value="Commercial">Commercial</option>
+                  <option value="HMV">HMV (Heavy Motor Vehicle)</option>
+                  <option value="Automatic Only">Automatic Only</option>
+                  <option value="All">All Categories</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="profExperience">Experience (Years)</label>
+                <input type="number" id="profExperience" class="form-control" min="0" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profAvailability">Current Availability</label>
+                <select id="profAvailability" class="form-select">
+                  <option value="Available">Available for Work</option>
+                  <option value="Busy">Busy on Assignments</option>
+                  <option value="On Leave">On Leave</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="profSalary">Expected Rate (₹)</label>
+                <input type="number" id="profSalary" class="form-control" min="0" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profSalaryType">Salary Period</label>
+                <select id="profSalaryType" class="form-select">
+                  <option value="Daily">Per Day</option>
+                  <option value="Hourly">Per Hour</option>
+                  <option value="Monthly">Per Month</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="profSkills">Driving Skills (Comma-separated)</label>
+              <input type="text" id="profSkills" class="form-control" placeholder="Automatic Cars, Night Driving, Hill Driving, Luxury Sedans" />
+            </div>
+          </div>
+
+          <button type="submit" id="btnSaveProfile" class="btn btn-primary btn-lg" style="margin-top: 10px;">
+            Save Profile Changes
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/cities-data.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/notifications.js"></script>
+  <script src="/js/maps.js"></script>
+  <script src="/js/city-autocomplete.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let user = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!requireAuth()) return;
+
+      // Initialize searchable Pan-India city autocomplete
+      initCityAutocomplete({
+        inputId: 'profCity',
+        stateInputId: 'profState',
+        latInputId: 'profLat',
+        lngInputId: 'profLng',
+        placeholder: 'Search Indian cities (e.g. Amravati, Pune, Nagpur)...'
+      });
+
+      // Initialize "Use My Current Location" button with Nominatim and local fallback
+      initLocationDetector({
+        buttonId: 'btnProfileLocation',
+        cityInputId: 'profCity',
+        areaInputId: 'profArea',
+        stateInputId: 'profState',
+        latInputId: 'profLat',
+        lngInputId: 'profLng',
+        statusTextId: 'profLocationStatus'
+      });
+
+      await loadProfile();
+    });
+
+    async function loadProfile() {
+      try {
+        const res = await apiRequest('/users/profile');
+        user = res.user;
+
+        document.getElementById('roleBadge').innerText = user.role === 'owner' ? 'Car Owner' : 'Professional Driver';
+        document.getElementById('profName').value = user.name || '';
+        document.getElementById('profEmail').value = user.email || '';
+        document.getElementById('profPhone').value = user.phone || '';
+        document.getElementById('profAge').value = user.age || '';
+
+        const loc = user.location || {};
+        document.getElementById('profCity').value = loc.city || '';
+        document.getElementById('profArea').value = loc.area || '';
+        document.getElementById('profState').value = loc.state || '';
+        document.getElementById('profLat').value = loc.latitude !== null && loc.latitude !== undefined ? loc.latitude : '';
+        document.getElementById('profLng').value = loc.longitude !== null && loc.longitude !== undefined ? loc.longitude : '';
+
+        if (loc.latitude && loc.longitude) {
+          document.getElementById('gpsStatusText').innerText = `✓ GPS coordinates saved (${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)})`;
+        }
+
+        if (user.role === 'driver') {
+          document.getElementById('driverProfileFields').style.display = 'block';
+          document.getElementById('profLicenseNo').value = user.licenseNumber || '';
+          document.getElementById('profLicenseType').value = user.licenseType || 'LMV';
+          document.getElementById('profExperience').value = user.experience || 0;
+          document.getElementById('profAvailability').value = user.availability || 'Available';
+          document.getElementById('profSalary').value = user.expectedSalary || 0;
+          document.getElementById('profSalaryType').value = user.salaryType || 'Daily';
+          document.getElementById('profSkills').value = (user.skills || []).join(', ');
+        }
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnSaveProfile');
+      try {
+        btn.disabled = true;
+        btn.innerText = 'Saving...';
+
+        const payload = {
+          name: document.getElementById('profName').value.trim(),
+          phone: document.getElementById('profPhone').value.trim(),
+          age: document.getElementById('profAge').value || undefined,
+          location: {
+            city: document.getElementById('profCity').value.trim(),
+            area: document.getElementById('profArea').value.trim(),
+            state: document.getElementById('profState').value.trim(),
+            latitude: document.getElementById('profLat').value ? Number(document.getElementById('profLat').value) : undefined,
+            longitude: document.getElementById('profLng').value ? Number(document.getElementById('profLng').value) : undefined
+          }
+        };
+
+        if (user.role === 'driver') {
+          payload.licenseNumber = document.getElementById('profLicenseNo').value.trim();
+          payload.licenseType = document.getElementById('profLicenseType').value;
+          payload.experience = Number(document.getElementById('profExperience').value) || 0;
+          payload.availability = document.getElementById('profAvailability').value;
+          payload.expectedSalary = Number(document.getElementById('profSalary').value) || 0;
+          payload.salaryType = document.getElementById('profSalaryType').value;
+          payload.skills = document.getElementById('profSkills').value.split(',').map(s => s.trim()).filter(Boolean);
+        }
+
+        const res = await apiRequest('/users/profile', {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+
+        // Update stored user
+        localStorage.setItem('user', JSON.stringify(res.user));
+        showToast('Profile updated successfully!', 'success');
+        initNavbar();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Save Profile Changes';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browse Driver Jobs - LET ME DRIVE</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/drivers.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container navbar-container">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">🚘</div>
+        <span>LET ME DRIVE</span>
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="/jobs.html" class="nav-link active">Browse Jobs</a></li>
+        <li><a href="/drivers.html" class="nav-link">Find Drivers</a></li>
+        <li><a href="/driver-dashboard.html" class="nav-link">Driver Workspace</a></li>
+      </ul>
+      <div class="nav-auth" id="navAuth"></div>
+    </div>
+  </header>
+
+  <!-- Page Header -->
+  <div style="background: white; border-bottom: 1px solid var(--border); padding: 32px 0 24px;">
+    <div class="container">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--secondary);">Driver Hiring Requirements Marketplace</h1>
+          <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 4px;">
+            Drive personal cars for verified car owners. Choose from outstation tours, daily commutes, one-day hires, and hourly gigs.
+          </p>
+        </div>
+        <div>
+          <a href="/owner-dashboard.html" class="btn btn-primary btn-sm">+ Post a Driver Requirement</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="marketplace-layout">
+
+        <!-- Filter Sidebar -->
+        <aside class="filter-sidebar">
+          <div class="filter-header">
+            <h3>Filter Jobs</h3>
+            <button class="reset-filter-btn" onclick="resetFilters()">Reset All</button>
+          </div>
+
+          <form id="jobFilterForm">
+            <div class="form-group">
+              <label class="form-label">Search Keywords</label>
+              <input type="text" id="filterSearch" class="form-control" placeholder="Route, city, vehicle type..." />
+            </div>
+
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="form-label" style="margin-bottom: 0;">City / Location</label>
+                <button type="button" class="btn-current-location" id="btnJobLocation" title="Detect your city for nearby jobs">
+                  📍 Use My Current Location
+                </button>
+              </div>
+              <input type="text" id="filterCity" class="form-control" placeholder="Search Indian cities (e.g. Amravati, Pune, Nagpur)..." autocomplete="off" />
+              <input type="hidden" id="filterLat" />
+              <input type="hidden" id="filterLng" />
+              <div id="jobLocationStatus" style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px;"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Distance / Radius</label>
+              <select id="filterRadius" class="form-select">
+                <option value="">Any Distance</option>
+                <option value="5">Within 5 km</option>
+                <option value="10">Within 10 km</option>
+                <option value="25">Within 25 km</option>
+                <option value="50">Within 50 km</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Job Format</label>
+              <select id="filterJobType" class="form-select">
+                <option value="All">All Formats</option>
+                <option value="Outstation">Outstation Trip</option>
+                <option value="One Day">One Day Chauffeur</option>
+                <option value="Temporary">Temporary / Monthly Relief</option>
+                <option value="Hourly">Hourly</option>
+                <option value="Permanent">Permanent Driver</option>
+                <option value="Round Trip">Round Trip</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Min Required Experience</label>
+              <select id="filterExperience" class="form-select">
+                <option value="">Any Experience</option>
+                <option value="1">1+ Years</option>
+                <option value="3">3+ Years</option>
+                <option value="5">5+ Years</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Min Offered Salary (₹)</label>
+              <input type="number" id="filterMinSalary" class="form-control" placeholder="e.g. 1000" min="0" />
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Search Jobs</button>
+          </form>
+        </aside>
+
+        <!-- Main Feed -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="font-size: 1.3rem; font-weight: 700;">Open Driver Hiring Jobs</h2>
+            <div id="jobsCount" style="font-size: 0.9rem; color: var(--text-muted);">Loading jobs...</div>
+          </div>
+
+          <div id="jobsFeed">
+            <div class="spinner"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Job Detail & Map Modal -->
+  <div class="modal-backdrop" id="jobDetailModal">
+    <div class="modal-content" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 id="modalJobTitle">Job Details</h3>
+        <button class="modal-close" onclick="closeModal('jobDetailModal')">×</button>
+      </div>
+      <div class="modal-body" id="jobDetailModalBody">
+        <div class="spinner"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('jobDetailModal')">Close</button>
+        <button type="button" id="btnModalApply" class="btn btn-primary">Apply for Job</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Apply Modal -->
+  <div class="modal-backdrop" id="applyModal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>Submit Job Application</h3>
+        <button class="modal-close" onclick="closeModal('applyModal')">×</button>
+      </div>
+      <form id="applyForm">
+        <input type="hidden" id="applyJobId" />
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Your Proposed Rate (₹) *</label>
+            <input type="number" id="applyExpectedSalary" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Application Message / Cover Note</label>
+            <textarea id="applyMessage" class="form-control" placeholder="Introduce yourself, mention experience with this car type, punctuality, etc..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('applyModal')">Cancel</button>
+          <button type="submit" id="btnSubmitApp" class="btn btn-primary">Send Application</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/js/cities-data.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/notifications.js"></script>
+  <script src="/js/maps.js"></script>
+  <script src="/js/city-autocomplete.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let activeModalJob = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Initialize searchable city autocomplete with Pan-India cities
+      initCityAutocomplete({
+        inputId: 'filterCity',
+        latInputId: 'filterLat',
+        lngInputId: 'filterLng',
+        allowAllOption: true,
+        placeholder: 'Search Indian cities (e.g. Amravati, Nagpur, Pune)...',
+        onSelect: () => fetchJobs()
+      });
+
+      // Initialize native browser "Use My Current Location" button
+      initLocationDetector({
+        buttonId: 'btnJobLocation',
+        cityInputId: 'filterCity',
+        latInputId: 'filterLat',
+        lngInputId: 'filterLng',
+        statusTextId: 'jobLocationStatus',
+        onDetected: () => fetchJobs()
+      });
+
+      // Check url param for filter
+      const urlParams = new URLSearchParams(window.location.search);
+      const jType = urlParams.get('jobType');
+      if (jType) {
+        document.getElementById('filterJobType').value = jType;
+      }
+
+      await fetchJobs();
+    });
+
+    async function fetchJobs() {
+      const feed = document.getElementById('jobsFeed');
+      feed.innerHTML = '<div class="spinner"></div>';
+
+      const city = document.getElementById('filterCity').value.trim();
+      const lat = document.getElementById('filterLat').value;
+      const lng = document.getElementById('filterLng').value;
+      const radius = document.getElementById('filterRadius') ? document.getElementById('filterRadius').value : '';
+      const jobType = document.getElementById('filterJobType').value;
+      const minSalary = document.getElementById('filterMinSalary').value;
+      const requiredExperience = document.getElementById('filterExperience') ? document.getElementById('filterExperience').value : '';
+      const search = document.getElementById('filterSearch').value.trim();
+
+      const params = new URLSearchParams();
+      params.append('status', 'open');
+      if (city) params.append('city', city);
+      if (lat) params.append('lat', lat);
+      if (lng) params.append('lng', lng);
+      if (radius) params.append('radius', radius);
+      if (jobType && jobType !== 'All') params.append('jobType', jobType);
+      if (minSalary) params.append('minSalary', minSalary);
+      if (requiredExperience) params.append('requiredExperience', requiredExperience);
+      if (search) params.append('search', search);
+
+      try {
+        const data = await apiRequest(`/jobs?${params.toString()}`);
+        const jobs = data.jobs || [];
+        document.getElementById('jobsCount').innerText = `Found ${jobs.length} open jobs`;
+
+        if (jobs.length === 0) {
+          feed.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <h3>No Jobs Matched Your Filters</h3>
+              <p>Try broadening your search or resetting filters.</p>
+            </div>
+          `;
+          return;
+        }
+
+        feed.innerHTML = jobs.map(j => {
+          const owner = j.ownerId || {};
+          const car = j.carId || {};
+
+          return `
+            <div class="job-card">
+              <div class="job-card-header">
+                <div>
+                  <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
+                    <span class="badge badge-primary">${j.jobType}</span>
+                    <span class="badge badge-secondary">License: ${j.requiredLicenseType || 'LMV'}</span>
+                    <span class="badge badge-info">Min Exp: ${j.requiredExperience || 0} yrs</span>
+                    ${j.distanceKm !== undefined && j.distanceKm !== null ? `
+                      <span class="badge" style="background: #e0f2fe; color: #0369a1; font-weight: 600;">📍 ${j.distanceKm} km away</span>
+                    ` : ''}
+                  </div>
+                  <h3 class="job-card-title">${escapeHtml(j.title)}</h3>
+                  <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">
+                    Vehicle: <strong>${car.brand || 'Owner'} ${car.model || 'Car'} (${car.transmission || 'Manual'})</strong>
+                    • Owner: <strong>${escapeHtml(owner.name || 'Car Owner')}</strong>
+                    <span class="star-rating" style="margin-left: 6px;">★ ${owner.rating?.toFixed(1) || '5.0'}</span>
+                  </div>
+                </div>
+
+                <div class="job-salary-display" style="text-align: right;">
+                  <span class="job-salary-amount">${formatCurrency(j.salary)}</span>
+                  <span class="job-salary-type">${j.salaryType}</span>
+                </div>
+              </div>
+
+              <p style="font-size: 0.92rem; color: #475569; line-height: 1.5;">
+                ${escapeHtml(j.description)}
+              </p>
+
+              <div class="job-route-badge">
+                <span>📍 <strong>${j.pickupLocation?.city || 'Pune'}</strong> (${j.pickupLocation?.area || 'Pickup'})</span>
+                ${j.destination?.city ? `<span class="route-arrow">➔</span> <span>📍 <strong>${j.destination.city}</strong></span>` : ''}
+                <span style="margin-left: auto; font-weight: 500; font-size: 0.82rem; color: var(--text-muted);">
+                  📅 Starts: ${formatDate(j.startDate)}
+                </span>
+              </div>
+
+              <div class="job-card-footer">
+                <button class="btn btn-outline btn-sm" onclick="viewJobModal('${j._id}')">
+                  🗺️ View Route & Details
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="openApplyModal('${j._id}', '${escapeHtml(j.title)}', ${j.salary})">
+                  Apply for this Job →
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        feed.innerHTML = `<div class="empty-state"><p style="color: var(--danger);">${err.message}</p></div>`;
+      }
+    }
+
+    async function viewJobModal(id) {
+      document.getElementById('jobDetailModal').classList.add('show');
+      const body = document.getElementById('jobDetailModalBody');
+      body.innerHTML = '<div class="spinner"></div>';
+
+      try {
+        const res = await apiRequest(`/jobs/${id}`);
+        const j = res.job;
+        activeModalJob = j;
+
+        document.getElementById('modalJobTitle').innerText = j.title;
+
+        body.innerHTML = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; background: #f8fafc; padding: 16px; border-radius: var(--radius); margin-bottom: 16px; font-size: 0.9rem;">
+            <div>Format: <strong>${j.jobType}</strong></div>
+            <div>Offered Rate: <strong style="color: var(--primary);">${formatCurrency(j.salary)} / ${j.salaryType}</strong></div>
+            <div>Vehicle: <strong>${j.carId ? `${j.carId.brand} ${j.carId.model} (${j.carId.transmission} - ${j.carId.fuelType})` : 'Personal Car'}</strong></div>
+            <div>Dates: <strong>${formatDate(j.startDate)}</strong></div>
+            <div>Working Hours: <strong>${j.workingHours}</strong></div>
+            <div>License Required: <strong>${j.requiredLicenseType} (${j.requiredExperience}+ yrs)</strong></div>
+          </div>
+
+          <div style="margin-bottom: 16px;">
+            <strong style="display: block; font-size: 0.9rem; margin-bottom: 4px;">Job Description & Instructions:</strong>
+            <p style="font-size: 0.9rem; color: #334155; line-height: 1.5;">${escapeHtml(j.description)}</p>
+          </div>
+
+          <div>
+            <strong style="display: block; font-size: 0.9rem; margin-bottom: 6px;">Trip Route Map (OpenStreetMap):</strong>
+            <div id="jobRouteMap" class="map-container"></div>
+          </div>
+        `;
+
+        document.getElementById('btnModalApply').onclick = () => {
+          closeModal('jobDetailModal');
+          openApplyModal(j._id, j.title, j.salary);
+        };
+
+        // Render Leaflet route map
+        setTimeout(() => {
+          renderRouteMap('jobRouteMap', j.pickupLocation, j.destination);
+        }, 150);
+
+      } catch (err) {
+        body.innerHTML = `<p style="color: var(--danger);">${err.message}</p>`;
+      }
+    }
+
+    function openApplyModal(jobId, title, salary) {
+      const user = getStoredUser();
+      if (!user) {
+        window.location.href = '/login.html?redirect=/jobs.html';
+        return;
+      }
+      if (user.role !== 'driver') {
+        showToast('Only registered drivers can apply for driving jobs.', 'error');
+        return;
+      }
+
+      document.getElementById('applyJobId').value = jobId;
+      document.getElementById('applyExpectedSalary').value = salary;
+      document.getElementById('applyModal').classList.add('show');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('show');
+    }
+
+    document.getElementById('applyForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmitApp');
+      try {
+        btn.disabled = true;
+        btn.innerText = 'Submitting...';
+
+        const jobId = document.getElementById('applyJobId').value;
+        const expectedSalary = Number(document.getElementById('applyExpectedSalary').value);
+        const message = document.getElementById('applyMessage').value.trim();
+
+        const res = await apiRequest('/applications', {
+          method: 'POST',
+          body: JSON.stringify({ jobId, expectedSalary, message })
+        });
+
+        showToast(res.message, 'success');
+        closeModal('applyModal');
+        document.getElementById('applyForm').reset();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Send Application';
+      }
+    });
+
+    document.getElementById('jobFilterForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      fetchJobs();
+    });
+
+    function resetFilters() {
+      document.getElementById('jobFilterForm').reset();
+      document.getElementById('filterCity').value = '';
+      document.getElementById('filterLat').value = '';
+      document.getElementById('filterLng').value = '';
+      const statusEl = document.getElementById('jobLocationStatus');
+      if (statusEl) statusEl.innerText = '';
+      fetchJobs();
+    }
+  </script>
+</body>
+</html>

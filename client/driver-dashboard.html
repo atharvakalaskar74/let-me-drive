@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Driver Dashboard - LET ME DRIVE</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/drivers.css" />
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container navbar-container">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">🚘</div>
+        <span>LET ME DRIVE</span>
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="/driver-dashboard.html" class="nav-link active">Dashboard</a></li>
+        <li><a href="/jobs.html" class="nav-link">Browse Jobs</a></li>
+        <li><a href="/profile.html" class="nav-link">My Profile & Skills</a></li>
+      </ul>
+      <div class="nav-auth" id="navAuth"></div>
+    </div>
+  </header>
+
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <div class="container">
+      <div class="dashboard-title-row">
+        <div>
+          <h1 class="dashboard-heading" id="driverWelcomeName">Professional Driver Workspace</h1>
+          <p class="dashboard-subheading">Track your job applications, confirmed assignments, client ratings, and earnings</p>
+        </div>
+        <div>
+          <span class="badge badge-success" style="font-size: 0.9rem; padding: 8px 16px;">
+            ✓ Active & Verified Professional Driver
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="main-content" style="padding-top: 0;">
+    <div class="container">
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">💼</div>
+          <div>
+            <div class="stat-value" id="statOpenJobsCount">0</div>
+            <div class="stat-label">Matching Jobs Available</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon amber">📨</div>
+          <div>
+            <div class="stat-value" id="statMyAppsCount">0</div>
+            <div class="stat-label">Applications Sent</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon green">🤝</div>
+          <div>
+            <div class="stat-value" id="statDriverBookingsCount">0</div>
+            <div class="stat-label">Confirmed Bookings</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon purple">⭐</div>
+          <div>
+            <div class="stat-value" id="statDriverRating">5.0</div>
+            <div class="stat-label" id="statDriverReviewsCount">0 Reviews</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="tabs-container">
+        <div class="tab-nav">
+          <button class="tab-btn active" onclick="switchTab('tabAvailableJobs', this)">
+            💼 Available Jobs <span class="tab-count" id="badgeAvailable">0</span>
+          </button>
+          <button class="tab-btn" onclick="switchTab('tabMyApplications', this)">
+            📨 My Applications <span class="tab-count" id="badgeMyApps">0</span>
+          </button>
+          <button class="tab-btn" onclick="switchTab('tabDriverBookings', this)">
+            🚗 Confirmed Driving Bookings <span class="tab-count" id="badgeDriverBookings">0</span>
+          </button>
+          <button class="tab-btn" onclick="switchTab('tabDriverReviews', this)">
+            ⭐ Ratings & Client Reviews
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab 1: Available Jobs -->
+      <div class="tab-content active" id="tabAvailableJobs">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h3 style="font-size: 1.15rem; font-weight: 700;">Open Driver Hiring Requirements</h3>
+          <a href="/jobs.html" class="btn btn-outline btn-sm">Full Jobs Marketplace →</a>
+        </div>
+        <div id="driverJobsFeed">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- Tab 2: My Applications -->
+      <div class="tab-content" id="tabMyApplications">
+        <div id="myApplicationsFeed">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Confirmed Bookings -->
+      <div class="tab-content" id="tabDriverBookings">
+        <div id="driverBookingsFeed">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Reviews -->
+      <div class="tab-content" id="tabDriverReviews">
+        <div id="driverReviewsFeed">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Apply Modal -->
+  <div class="modal-backdrop" id="applyModal">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3>Apply for Driving Job</h3>
+        <button class="modal-close" onclick="closeModal('applyModal')">×</button>
+      </div>
+      <form id="applyForm">
+        <input type="hidden" id="applyJobId" />
+        <div class="modal-body">
+          <div style="margin-bottom: 16px;">
+            <div id="applyJobTitle" style="font-weight: 700; font-size: 1.05rem; color: var(--secondary);">Job Title</div>
+            <div id="applyJobMeta" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Details</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Expected Salary / Rate (₹) *</label>
+            <input type="number" id="applyExpectedSalary" class="form-control" placeholder="e.g. 2000" min="0" required />
+            <div class="form-help">Enter your proposed rate or keep the owner's offered amount.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Message / Cover Note to Car Owner</label>
+            <textarea id="applyMessage" class="form-control" placeholder="Introduce yourself, mention your driving experience with this vehicle type, familiarity with the route, etc..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('applyModal')">Cancel</button>
+          <button type="submit" id="btnSubmitApp" class="btn btn-primary">Submit Application</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/notifications.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let currentDriver = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!requireAuth(['driver'])) return;
+      currentDriver = getStoredUser();
+
+      if (currentDriver) {
+        document.getElementById('driverWelcomeName').innerText = `Welcome, ${currentDriver.name}`;
+        document.getElementById('statDriverRating').innerText = (currentDriver.rating || 5.0).toFixed(1) + ' ★';
+        document.getElementById('statDriverReviewsCount').innerText = `${currentDriver.totalReviews || 0} Reviews`;
+      }
+
+      await loadDriverWorkspace();
+    });
+
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(tb => tb.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      el.classList.add('active');
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('show'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    async function loadDriverWorkspace() {
+      await Promise.all([
+        loadOpenJobs(),
+        loadMyApplications(),
+        loadBookings(),
+        loadReviews()
+      ]);
+    }
+
+    // 1. Available Jobs
+    async function loadOpenJobs() {
+      try {
+        const data = await apiRequest('/jobs?status=open&limit=10');
+        const jobs = data.jobs || [];
+        document.getElementById('statOpenJobsCount').innerText = jobs.length;
+        document.getElementById('badgeAvailable').innerText = jobs.length;
+
+        const feed = document.getElementById('driverJobsFeed');
+        if (jobs.length === 0) {
+          feed.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">💼</div>
+              <h3>No Jobs Currently Posted</h3>
+              <p>Check back shortly as car owners frequently post new driver requirements.</p>
+            </div>
+          `;
+          return;
+        }
+
+        feed.innerHTML = jobs.map(j => `
+          <div class="card" style="margin-bottom: 16px; padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 12px;">
+              <div>
+                <span class="badge badge-primary">${j.jobType}</span>
+                <span class="badge badge-secondary">License: ${j.requiredLicenseType || 'LMV'}</span>
+                <h3 style="font-size: 1.15rem; margin-top: 6px;">${escapeHtml(j.title)}</h3>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 2px;">
+                  Vehicle: <strong>${j.carId ? `${j.carId.brand} ${j.carId.model} (${j.carId.transmission})` : 'Owner Car'}</strong>
+                  • Owner: <strong>${j.ownerId ? j.ownerId.name : 'Car Owner'}</strong>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 1.25rem; font-weight: 800; color: var(--primary);">${formatCurrency(j.salary)}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">${j.salaryType}</div>
+              </div>
+            </div>
+
+            <p style="font-size: 0.9rem; color: #475569; margin-bottom: 14px;">${escapeHtml(j.description)}</p>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 14px; font-size: 0.85rem; flex-wrap: wrap; gap: 10px;">
+              <div>
+                📍 Pickup: <strong>${j.pickupLocation?.city || ''}${j.pickupLocation?.area ? `, ${j.pickupLocation?.area}` : ''}</strong>
+                ${j.destination?.city ? ` ➔ <strong>${j.destination.city}</strong>` : ''}
+                • 📅 Date: <strong>${formatDate(j.startDate)}</strong>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openApplyModal('${j._id}', '${escapeHtml(j.title)}', ${j.salary}, '${j.salaryType}')">
+                Apply for this Job →
+              </button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // 2. My Applications
+    async function loadMyApplications() {
+      try {
+        const data = await apiRequest('/applications/my');
+        const apps = data.applications || [];
+        document.getElementById('statMyAppsCount').innerText = apps.length;
+        document.getElementById('badgeMyApps').innerText = apps.length;
+
+        const feed = document.getElementById('myApplicationsFeed');
+        if (apps.length === 0) {
+          feed.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📨</div>
+              <h3>No Applications Submitted</h3>
+              <p>Browse open jobs above to find driving requirements and send your proposals.</p>
+            </div>
+          `;
+          return;
+        }
+
+        feed.innerHTML = apps.map(a => {
+          const j = a.jobId || {};
+          const isAccepted = a.status === 'accepted';
+          const isRejected = a.status === 'rejected';
+
+          return `
+            <div class="card" style="margin-bottom: 16px; padding: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="font-size: 1.05rem; font-weight: 700;">${escapeHtml(j.title || 'Driving Job')}</h4>
+                <span class="badge ${isAccepted ? 'badge-success' : isRejected ? 'badge-danger' : 'badge-warning'}">
+                  ${a.status.toUpperCase()}
+                </span>
+              </div>
+
+              <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+                Owner: <strong>${j.ownerId?.name || 'Owner'}</strong>
+                • Applied on: ${formatDate(a.appliedAt)}
+                • Proposed Rate: <strong style="color: var(--primary);">${formatCurrency(a.expectedSalary)}</strong>
+              </div>
+
+              ${a.message ? `
+                <div style="background: #f8fafc; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.88rem; color: #334155; margin-bottom: 12px;">
+                  "${escapeHtml(a.message)}"
+                </div>
+              ` : ''}
+
+              ${isAccepted ? `
+                <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between;">
+                  <span>🎉 Accepted! A confirmed booking has been created. Check the <strong>Confirmed Bookings</strong> tab.</span>
+                  <button class="btn btn-success btn-sm" onclick="switchTab('tabDriverBookings', document.querySelectorAll('.tab-btn')[2])">
+                    View Booking →
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // 3. Bookings
+    async function loadBookings() {
+      try {
+        const data = await apiRequest('/bookings');
+        const bookings = data.bookings || [];
+        document.getElementById('statDriverBookingsCount').innerText = bookings.length;
+        document.getElementById('badgeDriverBookings').innerText = bookings.length;
+
+        const feed = document.getElementById('driverBookingsFeed');
+        if (bookings.length === 0) {
+          feed.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🚗</div>
+              <h3>No Confirmed Bookings Yet</h3>
+              <p>When a car owner accepts your application, your confirmed booking and trip details will be displayed here.</p>
+            </div>
+          `;
+          return;
+        }
+
+        feed.innerHTML = bookings.map(b => {
+          const owner = b.ownerId || {};
+          const car = b.carId || {};
+          const isCompleted = b.status === 'completed';
+          const isUpcoming = b.status === 'upcoming' || b.status === 'active';
+
+          return `
+            <div class="booking-card">
+              <div class="booking-header">
+                <div class="booking-title">${escapeHtml(b.jobId?.title || 'Personal Driver Booking')}</div>
+                <span class="badge ${isCompleted ? 'badge-success' : b.status === 'cancelled' ? 'badge-danger' : 'badge-primary'}">
+                  ${b.status.toUpperCase()}
+                </span>
+              </div>
+
+              <div class="booking-route">
+                <span>📍 <strong>${b.pickupLocation?.city || 'Pune'}</strong> (${b.pickupLocation?.area || 'Area'})</span>
+                ${b.destination?.city ? `<span class="route-arrow">➔</span> <span>📍 <strong>${b.destination.city}</strong></span>` : ''}
+                <span style="margin-left: auto; color: var(--text-muted); font-size: 0.85rem;">
+                  📅 ${formatDate(b.startDate)}
+                </span>
+              </div>
+
+              <div class="booking-parties">
+                <div class="party-box">
+                  <div class="user-avatar" style="width: 40px; height: 40px;">${owner.name ? owner.name[0] : 'O'}</div>
+                  <div>
+                    <div style="font-weight: 700;">Owner: ${escapeHtml(owner.name || 'Car Owner')}</div>
+                    <div style="color: var(--text-muted); font-size: 0.8rem;">📞 ${escapeHtml(owner.phone || 'Contact provided on hire')}</div>
+                  </div>
+                </div>
+                <div class="party-box">
+                  <div>🚗 Vehicle: <strong>${car.brand || 'Owner'} ${car.model || 'Car'}</strong> (${car.transmission || 'Manual'})</div>
+                </div>
+                <div class="party-box" style="justify-content: flex-end;">
+                  <div>Agreed Rate: <strong style="font-size: 1.15rem; color: var(--primary);">${formatCurrency(b.agreedAmount)}</strong></div>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border); padding-top: 14px;">
+                ${isUpcoming ? `
+                  <button class="btn btn-success btn-sm" onclick="completeDriverBooking('${b._id}')">
+                    ✓ Mark Driving Service Completed
+                  </button>
+                ` : `
+                  <span style="font-size: 0.85rem; color: var(--text-muted);">
+                    Service completed on this booking.
+                  </span>
+                `}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // 4. Reviews
+    async function loadReviews() {
+      if (!currentDriver || !currentDriver._id) return;
+      try {
+        const data = await apiRequest(`/reviews/driver/${currentDriver._id}`);
+        const reviews = data.reviews || [];
+        const feed = document.getElementById('driverReviewsFeed');
+
+        if (reviews.length === 0) {
+          feed.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">⭐</div>
+              <h3>No Reviews Yet</h3>
+              <p>Ratings and client feedback from car owners will appear here after you complete driving bookings.</p>
+            </div>
+          `;
+          return;
+        }
+
+        feed.innerHTML = reviews.map(r => `
+          <div class="card" style="margin-bottom: 16px; padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <div style="font-weight: 700;">${escapeHtml(r.ownerId?.name || 'Verified Car Owner')}</div>
+              <span class="star-rating">★ ${r.rating} / 5</span>
+            </div>
+            <p style="font-size: 0.92rem; color: #334155; font-style: italic;">
+              "${escapeHtml(r.comment || 'Great driving service!')}"
+            </p>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 8px;">
+              ${formatDate(r.createdAt)}
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function openApplyModal(jobId, title, salary, salaryType) {
+      document.getElementById('applyJobId').value = jobId;
+      document.getElementById('applyJobTitle').innerText = title;
+      document.getElementById('applyJobMeta').innerText = `Offered Rate: ${formatCurrency(salary)} (${salaryType})`;
+      document.getElementById('applyExpectedSalary').value = salary;
+      openModal('applyModal');
+    }
+
+    document.getElementById('applyForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const jobId = document.getElementById('applyJobId').value;
+        const expectedSalary = Number(document.getElementById('applyExpectedSalary').value);
+        const message = document.getElementById('applyMessage').value.trim();
+
+        const res = await apiRequest('/applications', {
+          method: 'POST',
+          body: JSON.stringify({ jobId, expectedSalary, message })
+        });
+
+        showToast(res.message, 'success');
+        closeModal('applyModal');
+        document.getElementById('applyForm').reset();
+        await loadMyApplications();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
+    async function completeDriverBooking(id) {
+      if (!confirm('Mark this driving assignment as completed?')) return;
+      try {
+        const res = await apiRequest(`/bookings/${id}/status`, {
+          method: 'PUT',
+          body: JSON.stringify({ status: 'completed' })
+        });
+        showToast('Booking marked completed!', 'success');
+        await loadBookings();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

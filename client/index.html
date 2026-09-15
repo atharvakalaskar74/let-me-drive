@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LET ME DRIVE - On-Demand Professional Drivers for Your Car</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/drivers.css" />
+  <style>
+    /* Hero section */
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      padding: 90px 0 110px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      background: radial-gradient(circle at 85% 30%, rgba(37, 99, 235, 0.25) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 50px;
+      align-items: center;
+    }
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(37, 99, 235, 0.2);
+      border: 1px solid rgba(37, 99, 235, 0.4);
+      color: #93c5fd;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .hero-title {
+      font-size: 3.2rem;
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+    }
+    .hero-title span {
+      background: linear-gradient(135deg, #60a5fa, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-desc {
+      font-size: 1.15rem;
+      color: #94a3b8;
+      margin-bottom: 34px;
+      line-height: 1.6;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .hero-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      padding: 30px;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    .hero-card-stat {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 12px 0;
+      font-size: 0.9rem;
+    }
+    .hero-card-stat:last-child {
+      border-bottom: none;
+    }
+
+    /* Clarification Banner */
+    .concept-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin: -40px auto 50px;
+      position: relative;
+      z-index: 10;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .concept-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--primary);
+      color: white;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+
+    /* Feature Grid */
+    .section-title {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .section-title h2 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--secondary);
+    }
+    .section-title p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      margin-top: 8px;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      margin-bottom: 70px;
+    }
+    .feature-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px 26px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+    .feature-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: var(--radius);
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    /* How It Works Steps */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-bottom: 70px;
+    }
+    .step-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      position: relative;
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      background: var(--secondary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-title { font-size: 2.4rem; }
+      .concept-banner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container navbar-container">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">🚘</div>
+        <span>LET ME DRIVE</span>
+      </a>
+
+      <ul class="navbar-nav">
+        <li><a href="/drivers.html" class="nav-link">Find Drivers</a></li>
+        <li><a href="/jobs.html" class="nav-link">Browse Jobs</a></li>
+        <li><a href="#howItWorks" class="nav-link">How It Works</a></li>
+        <li><a href="#safety" class="nav-link">Safety & Trust</a></li>
+      </ul>
+
+      <div class="nav-auth" id="navAuth">
+        <!-- Injected dynamically by auth.js -->
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div>
+          <div class="hero-tag">✨ Marketplace for Personal Car Drivers</div>
+          <h1 class="hero-title">
+            You Own The Car.<br />
+            <span>They Provide The Skill.</span>
+          </h1>
+          <p class="hero-desc">
+            Let Me Drive connects car owners directly with licensed, verified professional drivers. Whether you need an outstation chauffeur, daily commute driver, or temporary weekend relief — find the perfect match with explainable AI recommendations.
+          </p>
+          <div class="hero-actions">
+            <a href="/register.html?role=owner" class="btn btn-primary btn-lg">
+              🚗 I Need a Driver (Car Owner)
+            </a>
+            <a href="/register.html?role=driver" class="btn btn-outline btn-lg" style="color: white; border-color: rgba(255,255,255,0.3);">
+              💼 I Want to Drive (Driver)
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <h3 style="margin-bottom: 16px; font-size: 1.2rem;">⚡ Live Platform Activity</h3>
+          <div class="hero-card-stat">
+            <span style="color: #94a3b8;">Registered Verified Drivers</span>
+            <strong style="color: #60a5fa;">500+ across cities</strong>
+          </div>
+          <div class="hero-card-stat">
+            <span style="color: #94a3b8;">Average Match Score</span>
+            <strong style="color: #34d399;">94% Match</strong>
+          </div>
+          <div class="hero-card-stat">
+            <span style="color: #94a3b8;">Average Driver Rating</span>
+            <strong style="color: #fbbf24;">4.8 ★★★★★</strong>
+          </div>
+          <div class="hero-card-stat">
+            <span style="color: #94a3b8;">Supported Vehicle Types</span>
+            <strong style="color: white;">Manual & Automatic Cars, SUVs, EV</strong>
+          </div>
+          <div style="margin-top: 20px;">
+            <a href="/drivers.html" class="btn btn-primary btn-block" style="background: rgba(37,99,235,0.8);">
+              Explore Drivers Near You →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+
+      <!-- Clarification Banner -->
+      <div class="concept-banner">
+        <div class="concept-icon">🛡️</div>
+        <div>
+          <h3 style="color: #1e40af; font-size: 1.15rem; font-weight: 700;">Not a Taxi App — A True Driver Marketplace</h3>
+          <p style="color: #3b82f6; font-size: 0.92rem; margin-top: 4px;">
+            Unlike cab aggregator services, drivers do not bring commercial cabs. You provide your own comfortable car, and professional drivers provide verified driving services on your terms.
+          </p>
+        </div>
+      </div>
+
+      <!-- How It Works Section -->
+      <section id="howItWorks" style="padding: 40px 0;">
+        <div class="section-title">
+          <h2>How Let Me Drive Works</h2>
+          <p>Simple, transparent workflow for both car owners and professional drivers</p>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <h3 style="font-size: 1.2rem; color: var(--primary); margin-bottom: 16px;">For Car Owners:</h3>
+          <div class="steps-grid">
+            <div class="step-card">
+              <div class="step-num">1</div>
+              <h4 style="margin-bottom: 8px;">Register & Add Car</h4>
+              <p style="font-size: 0.88rem; color: var(--text-muted);">Add your car specifications (transmission, fuel, model) for compatible driver matching.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">2</div>
+              <h4 style="margin-bottom: 8px;">Post Requirement</h4>
+              <p style="font-size: 0.88rem; color: var(--text-muted);">Set your dates, pickup location, destination, working hours, and offered rate.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">3</div>
+              <h4 style="margin-bottom: 8px;">AI Recommendations</h4>
+              <p style="font-size: 0.88rem; color: var(--text-muted);">View explainable match percentages and select from verified applicants.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">4</div>
+              <h4 style="margin-bottom: 8px;">Hire & Rate</h4>
+              <p style="font-size: 0.88rem; color: var(--text-muted);">Confirm booking with 1-click, enjoy a safe ride, and rate your driver afterwards.</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 style="font-size: 1.2rem; color: var(--secondary); margin-bottom: 16px;">For Professional Drivers:</h3>
+          <div class="steps-grid">
+            <div class="step-card">
+              <div class="step-num">1</div>
+              <h4 style="margin-bottom: 8px;">Create Driver Profile</h4>
+              <p style="font-size: 0.88rem; color: var(--text-muted);">Showcase your license type, years of experience, and driving skills.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">2</div>
+              <h4 style="margin-bottom: 8px;">Browse Nearby Jobs</h4>
+              <p style="font-size: 0.88rem; color: var(--text-muted);">Search outstation, daily, hourly, or permanent jobs in your city.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">3</div>
+              <h4 style="margin-bottom: 8px;">Apply with Rate</h4>
+              <p style="font-size: 0.88rem; color: var(--text-muted);">Send custom application message and state your expected salary/rate.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">4</div>
+              <h4 style="margin-bottom: 8px;">Get Hired & Build Reputation</h4>
+              <p style="font-size: 0.88rem; color: var(--text-muted);">Complete assignments, earn direct payments, and accumulate 5-star reviews.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Key Platform Features -->
+      <section style="padding: 40px 0;">
+        <div class="section-title">
+          <h2>Why Choose Let Me Drive</h2>
+          <p>Engineered for trust, safety, and algorithmic matching</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🧠</div>
+            <h3 style="margin-bottom: 10px; font-size: 1.15rem;">Explainable AI Matching</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              Deterministic algorithm balancing location (30%), experience (20%), rating (15%), availability (15%), and license type (10%) with human-readable explanations.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🗺️</div>
+            <h3 style="margin-bottom: 10px; font-size: 1.15rem;">Privacy-Preserving Location</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              Powered by Leaflet.js and OpenStreetMap. Displays city, area, and approximate radius without publicly revealing private residential addresses.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">⏱️</div>
+            <h3 style="margin-bottom: 10px; font-size: 1.15rem;">Flexible Hiring Formats</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              Support for Hourly, One Day, Outstation tours, Round Trips, Temporary replacements, and Permanent monthly chauffeur appointments.
+            </p>
+          </div>
+
+          <div class="feature-card" id="safety">
+            <div class="feature-icon">⭐</div>
+            <h3 style="margin-bottom: 10px; font-size: 1.15rem;">Verified Reviews & Ratings</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              Only verified car owners who have completed confirmed bookings can submit ratings, preventing fake reviews and ensuring high service standards.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Featured Drivers Preview Section -->
+      <section style="padding: 30px 0 50px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px;">
+          <div>
+            <h2 style="font-size: 1.8rem; font-weight: 800;">Featured Top Drivers</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Highly rated professional drivers ready for immediate assignment</p>
+          </div>
+          <a href="/drivers.html" class="btn btn-outline" style="font-size: 0.9rem;">View All Registered Drivers →</a>
+        </div>
+
+        <div class="drivers-grid" id="featuredDriversGrid">
+          <div class="spinner"></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>🚘 LET ME DRIVE</h3>
+          <p>
+            The dedicated driver marketplace connecting car owners with professional drivers for their personal vehicles. Built as a college demonstration project.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <ul class="footer-links">
+            <li><a href="/drivers.html">Browse Drivers</a></li>
+            <li><a href="/jobs.html">Browse Jobs</a></li>
+            <li><a href="/register.html?role=owner">For Car Owners</a></li>
+            <li><a href="/register.html?role=driver">For Drivers</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Job Types</h4>
+          <ul class="footer-links">
+            <li><a href="/jobs.html?jobType=Outstation">Outstation Trips</a></li>
+            <li><a href="/jobs.html?jobType=One+Day">One Day Chauffeur</a></li>
+            <li><a href="/jobs.html?jobType=Hourly">Hourly Rental</a></li>
+            <li><a href="/jobs.html?jobType=Permanent">Permanent Driver</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Demo Credentials</h4>
+          <p style="font-size: 0.85rem; color: #94a3b8; line-height: 1.5;">
+            Owner: <code>owner.rahul@example.com</code><br />
+            Driver: <code>driver.ramesh@example.com</code><br />
+            Password: <code>Password@123</code>
+          </p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 LET ME DRIVE Platform. Free-tier Zero Cost Architecture.</div>
+        <div>College Project Demonstration</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/notifications.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const data = await apiRequest('/drivers?limit=3');
+        const grid = document.getElementById('featuredDriversGrid');
+        if (data.success && data.drivers && data.drivers.length > 0) {
+          grid.innerHTML = data.drivers.map(d => `
+            <div class="driver-card">
+              <div class="driver-card-header">
+                ${d.profileImage ? `
+                  <img src="${d.profileImage}" alt="${d.name}" class="driver-avatar" />
+                ` : `
+                  <div class="driver-avatar">${d.name[0]}</div>
+                `}
+                <div class="driver-summary">
+                  <div class="driver-name">
+                    ${escapeHtml(d.name)}
+                    <span class="badge badge-success">Verified</span>
+                  </div>
+                  <div class="driver-location">
+                    📍 ${d.location?.city || 'Pune'}, ${d.location?.area || 'City Area'}
+                  </div>
+                  <div class="driver-meta-row">
+                    <span class="star-rating">★ ${d.rating?.toFixed(1) || '5.0'}</span>
+                    <span style="color: var(--text-muted);">(${d.totalReviews || 0} reviews)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="driver-card-body">
+                <div class="spec-pills">
+                  <div class="spec-pill">Exp: <strong>${d.experience || 0} yrs</strong></div>
+                  <div class="spec-pill">License: <strong>${d.licenseType || 'LMV'}</strong></div>
+                  <div class="spec-pill">Status: <strong style="color: var(--success);">${d.availability || 'Available'}</strong></div>
+                </div>
+                <div class="driver-skills">
+                  ${(d.skills || ['Night Driving', 'Automatic']).slice(0, 3).map(s => `
+                    <span class="skill-tag">${escapeHtml(s)}</span>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="driver-card-footer">
+                <div class="driver-rate">
+                  <strong>${formatCurrency(d.expectedSalary || 1500)}</strong> / ${d.salaryType || 'Day'}
+                </div>
+                <a href="/drivers.html?driverId=${d._id}" class="btn btn-primary btn-sm">View Profile</a>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>

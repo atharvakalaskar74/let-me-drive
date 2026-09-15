@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Find Professional Drivers - LET ME DRIVE</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/drivers.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container navbar-container">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">🚘</div>
+        <span>LET ME DRIVE</span>
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="/drivers.html" class="nav-link active">Find Drivers</a></li>
+        <li><a href="/jobs.html" class="nav-link">Browse Jobs</a></li>
+        <li><a href="/owner-dashboard.html" class="nav-link">Owner Workspace</a></li>
+      </ul>
+      <div class="nav-auth" id="navAuth"></div>
+    </div>
+  </header>
+
+  <!-- Page Header -->
+  <div style="background: white; border-bottom: 1px solid var(--border); padding: 32px 0 24px;">
+    <div class="container">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--secondary);">Find & Hire Professional Drivers</h1>
+          <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 4px;">
+            Browse all verified drivers or explore explainable AI matches tailored to your car and route requirements.
+          </p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-primary btn-sm" id="tabBtnAi" onclick="setViewMode('ai')">
+            ✨ AI Recommended Drivers
+          </button>
+          <button class="btn btn-outline btn-sm" id="tabBtnAll" onclick="setViewMode('all')">
+            👥 All Registered Drivers
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="marketplace-layout">
+
+        <!-- Filter Sidebar -->
+        <aside class="filter-sidebar">
+          <div class="filter-header">
+            <h3>Filters & Search</h3>
+            <button class="reset-filter-btn" onclick="resetFilters()">Reset All</button>
+          </div>
+
+          <form id="filterForm">
+            <div class="form-group">
+              <label class="form-label">Keyword Search</label>
+              <input type="text" id="filterSearch" class="form-control" placeholder="Name, skills, locality..." />
+            </div>
+
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="form-label" style="margin-bottom: 0;">City / Location</label>
+                <button type="button" class="btn-current-location" id="btnFilterLocation" title="Detect your current city and nearby drivers">
+                  📍 Use My Current Location
+                </button>
+              </div>
+              <input type="text" id="filterCity" class="form-control" placeholder="Search Indian cities (e.g. Amravati, Pune, Nagpur)..." autocomplete="off" />
+              <input type="hidden" id="filterLat" />
+              <input type="hidden" id="filterLng" />
+              <div id="filterLocationStatus" style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px;"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Distance / Radius</label>
+              <select id="filterRadius" class="form-select">
+                <option value="">Any Distance</option>
+                <option value="5">Within 5 km</option>
+                <option value="10">Within 10 km</option>
+                <option value="25">Within 25 km</option>
+                <option value="50">Within 50 km</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">License Category</label>
+              <select id="filterLicense" class="form-select">
+                <option value="All">All Categories</option>
+                <option value="LMV">LMV (Light Motor Vehicle)</option>
+                <option value="Commercial">Commercial</option>
+                <option value="HMV">HMV (Heavy Vehicle)</option>
+                <option value="Automatic Only">Automatic Only</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Min Experience</label>
+              <select id="filterExperience" class="form-select">
+                <option value="">Any Experience</option>
+                <option value="2">2+ Years</option>
+                <option value="5">5+ Years</option>
+                <option value="8">8+ Years</option>
+                <option value="10">10+ Years</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Availability Status</label>
+              <select id="filterAvailability" class="form-select">
+                <option value="All">All Statuses</option>
+                <option value="Available" selected>Available Now</option>
+                <option value="Busy">Busy</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Min Star Rating</label>
+              <select id="filterRating" class="form-select">
+                <option value="">Any Rating</option>
+                <option value="4.5">4.5 ★ and above</option>
+                <option value="4.0">4.0 ★ and above</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Apply Filters</button>
+          </form>
+        </aside>
+
+        <!-- Main Marketplace Feed -->
+        <div>
+          <!-- AI Section Banner (visible when in AI mode) -->
+          <div id="aiBanner" class="ai-rec-banner">
+            <div class="ai-rec-info">
+              <h3>⚡ AI-Assisted Recommendation Engine</h3>
+              <p>
+                Drivers ranked by a deterministic 6-factor algorithm: Location Match (30%), Experience (20%), Rating (15%), Availability (15%), License (10%), and Job Preference (10%).
+              </p>
+            </div>
+            <div style="font-size: 0.85rem; color: #a5b4fc;">
+              Total Scored: <strong id="aiScoredCount" style="color: white;">0</strong>
+            </div>
+          </div>
+
+          <!-- Section Heading -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 id="viewHeading" style="font-size: 1.3rem; font-weight: 700;">AI Recommended Drivers</h2>
+            <div id="resultsCount" style="font-size: 0.9rem; color: var(--text-muted);">Loading drivers...</div>
+          </div>
+
+          <!-- Drivers Grid -->
+          <div class="drivers-grid" id="driversGrid">
+            <div class="spinner"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Driver Detail Modal -->
+  <div class="modal-backdrop" id="driverModal">
+    <div class="modal-content" style="max-width: 620px;">
+      <div class="modal-header">
+        <h3 id="modalDriverTitle">Driver Profile</h3>
+        <button class="modal-close" onclick="closeModal('driverModal')">×</button>
+      </div>
+      <div class="modal-body" id="driverModalBody">
+        <div class="spinner"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('driverModal')">Close</button>
+        <a href="/owner-dashboard.html" class="btn btn-primary">Invite to My Job</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/js/cities-data.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/notifications.js"></script>
+  <script src="/js/maps.js"></script>
+  <script src="/js/city-autocomplete.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let currentViewMode = 'ai'; // 'ai' or 'all'
+    let driversCache = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Initialize searchable city autocomplete with Pan-India cities
+      initCityAutocomplete({
+        inputId: 'filterCity',
+        latInputId: 'filterLat',
+        lngInputId: 'filterLng',
+        allowAllOption: true,
+        placeholder: 'Search Indian cities (e.g. Amravati, Nagpur, Pune)...',
+        onSelect: () => fetchDrivers()
+      });
+
+      // Initialize native browser "Use My Current Location" button
+      initLocationDetector({
+        buttonId: 'btnFilterLocation',
+        cityInputId: 'filterCity',
+        latInputId: 'filterLat',
+        lngInputId: 'filterLng',
+        statusTextId: 'filterLocationStatus',
+        onDetected: () => fetchDrivers()
+      });
+
+      // Check query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('view') === 'all') {
+        currentViewMode = 'all';
+      }
+      updateViewButtons();
+      await fetchDrivers();
+
+      // If specific driver ID in URL, open modal directly
+      const driverId = urlParams.get('driverId');
+      if (driverId) {
+        viewDriverModal(driverId);
+      }
+    });
+
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      updateViewButtons();
+      fetchDrivers();
+    }
+
+    function updateViewButtons() {
+      const btnAi = document.getElementById('tabBtnAi');
+      const btnAll = document.getElementById('tabBtnAll');
+      const banner = document.getElementById('aiBanner');
+      const heading = document.getElementById('viewHeading');
+
+      if (currentViewMode === 'ai') {
+        btnAi.className = 'btn btn-primary btn-sm';
+        btnAll.className = 'btn btn-outline btn-sm';
+        banner.style.display = 'flex';
+        heading.innerText = 'AI Recommended Drivers';
+      } else {
+        btnAll.className = 'btn btn-primary btn-sm';
+        btnAi.className = 'btn btn-outline btn-sm';
+        banner.style.display = 'none';
+        heading.innerText = 'All Registered Professional Drivers';
+      }
+    }
+
+    async function fetchDrivers() {
+      const grid = document.getElementById('driversGrid');
+      grid.innerHTML = '<div class="spinner"></div>';
+
+      const city = document.getElementById('filterCity').value.trim();
+      const lat = document.getElementById('filterLat').value;
+      const lng = document.getElementById('filterLng').value;
+      const radius = document.getElementById('filterRadius') ? document.getElementById('filterRadius').value : '';
+      const licenseType = document.getElementById('filterLicense').value;
+      const minExperience = document.getElementById('filterExperience').value;
+      const availability = document.getElementById('filterAvailability').value;
+      const minRating = document.getElementById('filterRating').value;
+      const search = document.getElementById('filterSearch').value.trim();
+
+      const params = new URLSearchParams();
+      if (city) params.append('city', city);
+      if (lat) params.append('lat', lat);
+      if (lng) params.append('lng', lng);
+      if (radius) params.append('radius', radius);
+      if (licenseType && licenseType !== 'All') params.append('licenseType', licenseType);
+      if (minExperience) params.append('minExperience', minExperience);
+      if (availability && availability !== 'All') params.append('availability', availability);
+      if (minRating) params.append('minRating', minRating);
+      if (search) params.append('search', search);
+
+      try {
+        if (currentViewMode === 'ai') {
+          const res = await apiRequest(`/drivers/recommended?${params.toString()}`);
+          renderAiDrivers(res.recommendations || []);
+        } else {
+          const res = await apiRequest(`/drivers?${params.toString()}`);
+          renderAllDrivers(res.drivers || []);
+        }
+      } catch (err) {
+        grid.innerHTML = `<div class="empty-state"><p style="color: var(--danger);">${escapeHtml(err.message)}</p></div>`;
+      }
+    }
+
+    function renderAiDrivers(recs) {
+      const grid = document.getElementById('driversGrid');
+      document.getElementById('resultsCount').innerText = `Showing ${recs.length} recommended drivers`;
+      document.getElementById('aiScoredCount').innerText = recs.length;
+
+      if (recs.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-state-icon">🔍</div>
+            <h3>No Recommended Drivers Found</h3>
+            <p>Try adjusting your city filter or view all registered drivers.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = recs.map(r => {
+        const d = r.driver;
+        return `
+          <div class="driver-card ai-matched">
+            <div class="ai-match-badge">
+              ⚡ ${r.matchScore}% Match
+            </div>
+
+            <div class="driver-card-header">
+              ${d.profileImage ? `
+                <img src="${d.profileImage}" alt="${d.name}" class="driver-avatar" />
+              ` : `
+                <div class="driver-avatar">${d.name[0]}</div>
+              `}
+              <div class="driver-summary">
+                <div class="driver-name">${escapeHtml(d.name)}</div>
+                <div class="driver-location">📍 ${d.location?.city || 'Pune'}, ${d.location?.area || 'Area'}</div>
+                <div class="driver-meta-row">
+                  <span class="star-rating">★ ${d.rating?.toFixed(1) || '5.0'}</span>
+                  <span style="color: var(--text-muted);">(${d.totalReviews || 0} reviews)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="driver-card-body">
+              <div class="ai-reasons-box">
+                <div class="ai-reasons-title">💡 Why AI recommends ${escapeHtml(d.name.split(' ')[0])}:</div>
+                <ul class="ai-reasons-list">
+                  ${r.reasons.map(reason => `
+                    <li>✓ ${escapeHtml(reason)}</li>
+                  `).join('')}
+                </ul>
+              </div>
+
+              <div class="spec-pills">
+                <div class="spec-pill">Exp: <strong>${d.experience || 0} yrs</strong></div>
+                <div class="spec-pill">License: <strong>${d.licenseType || 'LMV'}</strong></div>
+                <div class="spec-pill">Status: <strong style="color: var(--success);">${d.availability || 'Available'}</strong></div>
+                ${d.distanceKm !== undefined && d.distanceKm !== null ? `<div class="spec-pill" style="color: var(--primary); font-weight: 600;">📍 ${d.distanceKm} km away</div>` : ''}
+              </div>
+
+              <div class="driver-skills">
+                ${(d.skills || []).slice(0, 3).map(s => `
+                  <span class="skill-tag">${escapeHtml(s)}</span>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="driver-card-footer">
+              <div class="driver-rate">
+                <strong>${formatCurrency(d.expectedSalary || 1500)}</strong> / ${d.salaryType || 'Day'}
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="viewDriverModal('${d._id}')">
+                View Full Profile
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAllDrivers(drivers) {
+      const grid = document.getElementById('driversGrid');
+      document.getElementById('resultsCount').innerText = `Showing ${drivers.length} drivers`;
+
+      if (drivers.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-state-icon">👥</div>
+            <h3>No Drivers Found</h3>
+            <p>Try resetting filters or searching with different criteria.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = drivers.map(d => `
+        <div class="driver-card">
+          <div class="driver-card-header">
+            ${d.profileImage ? `
+              <img src="${d.profileImage}" alt="${d.name}" class="driver-avatar" />
+            ` : `
+              <div class="driver-avatar">${d.name[0]}</div>
+            `}
+            <div class="driver-summary">
+              <div class="driver-name">${escapeHtml(d.name)}</div>
+              <div class="driver-location">📍 ${d.location?.city || 'Pune'}, ${d.location?.area || 'Area'}</div>
+              <div class="driver-meta-row">
+                <span class="star-rating">★ ${d.rating?.toFixed(1) || '5.0'}</span>
+                <span style="color: var(--text-muted);">(${d.totalReviews || 0} reviews)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="driver-card-body">
+            <div class="spec-pills">
+              <div class="spec-pill">Exp: <strong>${d.experience || 0} yrs</strong></div>
+              <div class="spec-pill">License: <strong>${d.licenseType || 'LMV'}</strong></div>
+              <div class="spec-pill">Status: <strong style="color: ${d.availability === 'Available' ? 'var(--success)' : 'var(--warning)'};">${d.availability || 'Available'}</strong></div>
+              ${d.distanceKm !== undefined && d.distanceKm !== null ? `<div class="spec-pill" style="color: var(--primary); font-weight: 600;">📍 ${d.distanceKm} km away</div>` : ''}
+            </div>
+
+            <div class="driver-skills">
+              ${(d.skills || ['Automatic', 'Manual']).map(s => `
+                <span class="skill-tag">${escapeHtml(s)}</span>
+              `).join('')}
+            </div>
+
+            <div style="font-size: 0.82rem; color: var(--text-muted);">
+              Preferred Formats: <strong>${(d.preferredJobTypes || ['Outstation', 'One Day']).join(', ')}</strong>
+            </div>
+          </div>
+
+          <div class="driver-card-footer">
+            <div class="driver-rate">
+              <strong>${formatCurrency(d.expectedSalary || 1500)}</strong> / ${d.salaryType || 'Day'}
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="viewDriverModal('${d._id}')">
+              View Full Profile
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function viewDriverModal(id) {
+      document.getElementById('driverModal').classList.add('show');
+      const body = document.getElementById('driverModalBody');
+      body.innerHTML = '<div class="spinner"></div>';
+
+      try {
+        const res = await apiRequest(`/drivers/${id}`);
+        const d = res.driver;
+        const reviews = res.reviews || [];
+
+        document.getElementById('modalDriverTitle').innerText = `${d.name}'s Profile`;
+
+        body.innerHTML = `
+          <div style="display: flex; gap: 18px; align-items: center; margin-bottom: 20px;">
+            ${d.profileImage ? `
+              <img src="${d.profileImage}" alt="${d.name}" class="driver-avatar" style="width: 72px; height: 72px;" />
+            ` : `
+              <div class="driver-avatar" style="width: 72px; height: 72px; font-size: 2rem;">${d.name[0]}</div>
+            `}
+            <div>
+              <h3 style="font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                ${escapeHtml(d.name)}
+                <span class="badge badge-success">Verified Driver</span>
+              </h3>
+              <div style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">
+                📍 ${d.location?.city || 'Pune'}, ${d.location?.area || 'Area'} • Age: ${d.age || 'N/A'}
+              </div>
+              <div style="margin-top: 6px;">
+                <span class="star-rating">★ ${d.rating?.toFixed(1) || '5.0'} / 5</span>
+                <span style="color: var(--text-muted); font-size: 0.85rem;">(${d.totalReviews || 0} reviews)</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; font-size: 0.9rem; background: #f8fafc; padding: 16px; border-radius: var(--radius);">
+            <div>🪪 License: <strong>${d.licenseType} (${d.licenseNumber || 'Verified'})</strong></div>
+            <div>⏱️ Experience: <strong>${d.experience} Years</strong></div>
+            <div>⚡ Availability: <strong style="color: var(--success);">${d.availability}</strong></div>
+            <div>💰 Expected: <strong>${formatCurrency(d.expectedSalary)} / ${d.salaryType}</strong></div>
+          </div>
+
+          <div style="margin-bottom: 18px;">
+            <strong style="display: block; font-size: 0.88rem; margin-bottom: 6px;">Specialized Skills:</strong>
+            <div class="driver-skills">
+              ${(d.skills || []).map(s => `<span class="skill-tag">${escapeHtml(s)}</span>`).join('')}
+            </div>
+          </div>
+
+          <div style="margin-bottom: 18px;">
+            <strong style="display: block; font-size: 0.88rem; margin-bottom: 6px;">Operating Area (Approximate):</strong>
+            <div id="driverAreaMap" class="map-container"></div>
+          </div>
+
+          <div>
+            <strong style="display: block; font-size: 0.88rem; margin-bottom: 8px;">Client Reviews & Testimonials (${reviews.length}):</strong>
+            ${reviews.length === 0 ? `
+              <p style="font-size: 0.85rem; color: var(--text-muted);">No reviews posted yet.</p>
+            ` : reviews.map(r => `
+              <div style="border-top: 1px solid var(--border); padding: 10px 0; font-size: 0.85rem;">
+                <div style="display: flex; justify-content: space-between;">
+                  <strong>${escapeHtml(r.ownerId?.name || 'Car Owner')}</strong>
+                  <span class="star-rating">★ ${r.rating}</span>
+                </div>
+                <p style="color: #475569; margin-top: 4px; font-style: italic;">"${escapeHtml(r.comment)}"</p>
+              </div>
+            `).join('')}
+          </div>
+        `;
+
+        // Render Leaflet map for driver operating area (privacy-preserving)
+        setTimeout(() => {
+          renderDriverAreaMap(
+            'driverAreaMap',
+            d.location?.latitude,
+            d.location?.longitude,
+            d.location?.area,
+            d.location?.city
+          );
+        }, 100);
+
+      } catch (err) {
+        body.innerHTML = `<p style="color: var(--danger);">${err.message}</p>`;
+      }
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('show');
+    }
+
+    document.getElementById('filterForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      fetchDrivers();
+    });
+
+    function resetFilters() {
+      document.getElementById('filterForm').reset();
+      document.getElementById('filterCity').value = '';
+      document.getElementById('filterLat').value = '';
+      document.getElementById('filterLng').value = '';
+      const statusEl = document.getElementById('filterLocationStatus');
+      if (statusEl) statusEl.innerText = '';
+      fetchDrivers();
+    }
+  </script>
+</body>
+</html>

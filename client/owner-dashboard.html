@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Car Owner Dashboard - LET ME DRIVE</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/drivers.css" />
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container navbar-container">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">🚘</div>
+        <span>LET ME DRIVE</span>
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="/owner-dashboard.html" class="nav-link active">Dashboard</a></li>
+        <li><a href="/drivers.html" class="nav-link">Find Drivers</a></li>
+        <li><a href="/jobs.html" class="nav-link">Marketplace Jobs</a></li>
+      </ul>
+      <div class="nav-auth" id="navAuth"></div>
+    </div>
+  </header>
+
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <div class="container">
+      <div class="dashboard-title-row">
+        <div>
+          <h1 class="dashboard-heading">Car Owner Workspace</h1>
+          <p class="dashboard-subheading">Manage your personal vehicles, post driver requirements, and review applications</p>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <button class="btn btn-outline" onclick="openAddCarModal()">+ Add Car</button>
+          <button class="btn btn-primary" onclick="openPostJobModal()">+ Post Driver Requirement</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="main-content" style="padding-top: 0;">
+    <div class="container">
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">🚗</div>
+          <div>
+            <div class="stat-value" id="statCarsCount">0</div>
+            <div class="stat-label">My Registered Cars</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon amber">📋</div>
+          <div>
+            <div class="stat-value" id="statJobsCount">0</div>
+            <div class="stat-label">Active Job Postings</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon purple">📨</div>
+          <div>
+            <div class="stat-value" id="statAppsCount">0</div>
+            <div class="stat-label">Driver Applications</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon green">🤝</div>
+          <div>
+            <div class="stat-value" id="statBookingsCount">0</div>
+            <div class="stat-label">Confirmed Bookings</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="tabs-container">
+        <div class="tab-nav">
+          <button class="tab-btn active" onclick="switchTab('tabCars', this)">
+            🚗 My Cars <span class="tab-count" id="badgeCars">0</span>
+          </button>
+          <button class="tab-btn" onclick="switchTab('tabJobs', this)">
+            📋 My Driver Jobs <span class="tab-count" id="badgeJobs">0</span>
+          </button>
+          <button class="tab-btn" onclick="switchTab('tabApplications', this)">
+            📨 Applications Received <span class="tab-count" id="badgeApps">0</span>
+          </button>
+          <button class="tab-btn" onclick="switchTab('tabBookings', this)">
+            🤝 Bookings & Hired Drivers <span class="tab-count" id="badgeBookings">0</span>
+          </button>
+          <button class="tab-btn" onclick="switchTab('tabAiRecs', this)">
+            ✨ AI Recommended Drivers
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab 1: My Cars -->
+      <div class="tab-content active" id="tabCars">
+        <div class="cars-grid" id="carsGrid">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- Tab 2: My Driver Jobs -->
+      <div class="tab-content" id="tabJobs">
+        <div id="jobsList">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Applications Received -->
+      <div class="tab-content" id="tabApplications">
+        <div id="applicationsList">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Bookings & Hired Drivers -->
+      <div class="tab-content" id="tabBookings">
+        <div id="bookingsList">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- Tab 5: AI Recommended Drivers -->
+      <div class="tab-content" id="tabAiRecs">
+        <div class="ai-rec-banner">
+          <div class="ai-rec-info">
+            <h3>🤖 Explainable AI Driver Recommendations</h3>
+            <p>
+              Scored deterministically based on your city location, vehicle requirements, driving experience, verified ratings, and immediate driver availability.
+            </p>
+          </div>
+          <a href="/drivers.html" class="btn btn-outline" style="background: white; color: var(--secondary); font-size: 0.88rem;">
+            View All in Marketplace →
+          </a>
+        </div>
+        <div class="drivers-grid" id="aiRecsGrid">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MODAL 1: Add Car -->
+  <div class="modal-backdrop" id="addCarModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Register New Vehicle</h3>
+        <button class="modal-close" onclick="closeModal('addCarModal')">×</button>
+      </div>
+      <form id="addCarForm">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Brand *</label>
+              <input type="text" id="carBrand" class="form-control" placeholder="e.g. Hyundai, Toyota, Honda" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Model *</label>
+              <input type="text" id="carModel" class="form-control" placeholder="e.g. Creta, Innova, City" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Variant</label>
+              <input type="text" id="carVariant" class="form-control" placeholder="e.g. SX (O), ZX" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Year of Manufacture *</label>
+              <input type="number" id="carYear" class="form-control" placeholder="2023" min="1995" max="2026" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Registration Number *</label>
+              <input type="text" id="carRegNo" class="form-control" placeholder="e.g. MH12AB1234" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Transmission *</label>
+              <select id="carTransmission" class="form-select">
+                <option value="Manual">Manual Transmission</option>
+                <option value="Automatic">Automatic Transmission</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Fuel Type</label>
+              <select id="carFuel" class="form-select">
+                <option value="Petrol">Petrol</option>
+                <option value="Diesel">Diesel</option>
+                <option value="Electric">Electric (EV)</option>
+                <option value="CNG">CNG</option>
+                <option value="Hybrid">Hybrid</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Seating Capacity</label>
+              <input type="number" id="carSeats" class="form-control" value="5" min="2" max="10" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('addCarModal')">Cancel</button>
+          <button type="submit" id="btnSaveCar" class="btn btn-primary">Save Car</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 1B: Edit Car -->
+  <div class="modal-backdrop" id="editCarModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Vehicle Details</h3>
+        <button class="modal-close" onclick="closeModal('editCarModal')">×</button>
+      </div>
+      <form id="editCarForm">
+        <input type="hidden" id="editCarId" />
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Brand *</label>
+              <input type="text" id="editCarBrand" class="form-control" placeholder="e.g. Hyundai, Toyota" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Model *</label>
+              <input type="text" id="editCarModel" class="form-control" placeholder="e.g. Creta, Innova" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Variant</label>
+              <input type="text" id="editCarVariant" class="form-control" placeholder="e.g. SX (O), ZX" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Year of Manufacture *</label>
+              <input type="number" id="editCarYear" class="form-control" min="1990" max="2026" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Registration Number *</label>
+              <input type="text" id="editCarRegNo" class="form-control" placeholder="e.g. MH12AB1234" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Transmission *</label>
+              <select id="editCarTransmission" class="form-select">
+                <option value="Manual">Manual Transmission</option>
+                <option value="Automatic">Automatic Transmission</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Fuel Type</label>
+              <select id="editCarFuel" class="form-select">
+                <option value="Petrol">Petrol</option>
+                <option value="Diesel">Diesel</option>
+                <option value="Electric">Electric (EV)</option>
+                <option value="CNG">CNG</option>
+                <option value="Hybrid">Hybrid</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Seating Capacity</label>
+              <input type="number" id="editCarSeats" class="form-control" value="5" min="2" max="12" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('editCarModal')">Cancel</button>
+          <button type="submit" id="btnUpdateCar" class="btn btn-primary">Update Car</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Post Job -->
+  <div class="modal-backdrop" id="postJobModal">
+    <div class="modal-content" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3>Post Driver Requirement</h3>
+        <button class="modal-close" onclick="closeModal('postJobModal')">×</button>
+      </div>
+      <form id="postJobForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Job Title *</label>
+            <input type="text" id="jobTitle" class="form-control" placeholder="e.g. Weekend Outstation Driver to Lonavala" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Select Your Car</label>
+              <select id="jobCarSelect" class="form-select"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Job Format / Type *</label>
+              <select id="jobType" class="form-select" required>
+                <option value="Outstation">Outstation Trip</option>
+                <option value="One Day">One Day Chauffeur</option>
+                <option value="Temporary">Temporary / Relief</option>
+                <option value="Hourly">Hourly</option>
+                <option value="Permanent">Permanent Monthly</option>
+                <option value="Round Trip">Round Trip</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Detailed Requirements *</label>
+            <textarea id="jobDesc" class="form-control" placeholder="Describe the trip, expected driving conditions (e.g. night driving, automatic car, hill sections), pickup point, and duties..." required></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="form-label" style="margin-bottom: 0;">Pickup City *</label>
+                <button type="button" class="btn-current-location" id="btnJobPickupLocation" title="Fill pickup city from current GPS">
+                  📍 Use My Current Location
+                </button>
+              </div>
+              <input type="text" id="jobPickupCity" class="form-control" placeholder="Search Indian cities (e.g. Amravati, Pune)..." required autocomplete="off" />
+              <input type="hidden" id="jobPickupState" />
+              <input type="hidden" id="jobPickupLat" />
+              <input type="hidden" id="jobPickupLng" />
+              <div id="jobPickupStatus" style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px;"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Pickup Area / Address</label>
+              <input type="text" id="jobPickupArea" class="form-control" placeholder="e.g. Koregaon Park" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Destination City</label>
+              <input type="text" id="jobDestCity" class="form-control" placeholder="Search Indian cities (e.g. Nagpur, Mumbai)..." autocomplete="off" />
+              <input type="hidden" id="jobDestState" />
+              <input type="hidden" id="jobDestLat" />
+              <input type="hidden" id="jobDestLng" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Destination Area</label>
+              <input type="text" id="jobDestArea" class="form-control" placeholder="e.g. Bushi Dam Area" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Start Date *</label>
+              <input type="date" id="jobStartDate" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">End Date</label>
+              <input type="date" id="jobEndDate" class="form-control" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Offered Salary / Rate (₹) *</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="number" id="jobSalary" class="form-control" placeholder="e.g. 2000" min="0" required />
+                <select id="jobSalaryType" class="form-select" style="max-width: 110px;">
+                  <option value="Daily">Daily</option>
+                  <option value="Hourly">Hourly</option>
+                  <option value="Monthly">Monthly</option>
+                  <option value="Fixed">Fixed</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Min Required Experience</label>
+              <input type="number" id="jobReqExp" class="form-control" placeholder="e.g. 3 years" min="0" value="2" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">License Requirement</label>
+              <select id="jobReqLicense" class="form-select">
+                <option value="LMV">LMV (Light Motor Vehicle)</option>
+                <option value="Commercial">Commercial (Yellow Badge)</option>
+                <option value="HMV">HMV (Heavy Motor Vehicle)</option>
+                <option value="Automatic Only">Automatic Only</option>
+                <option value="All">All Categories</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Working Hours</label>
+              <input type="text" id="jobWorkingHours" class="form-control" placeholder="e.g. 8 Hours / Day, Flexible, 9 AM - 6 PM" value="Flexible" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('postJobModal')">Cancel</button>
+          <button type="submit" id="btnPublishJob" class="btn btn-primary">Publish Job</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: Rate Driver -->
+  <div class="modal-backdrop" id="rateDriverModal">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3>Rate & Review Driver</h3>
+        <button class="modal-close" onclick="closeModal('rateDriverModal')">×</button>
+      </div>
+      <form id="rateDriverForm">
+        <input type="hidden" id="rateBookingId" />
+        <div class="modal-body" style="text-align: center;">
+          <p id="rateDriverName" style="font-weight: 700; font-size: 1.1rem; margin-bottom: 6px;">Driver Name</p>
+          <p style="color: var(--text-muted); font-size: 0.88rem;">How was your driving experience? Your review helps other car owners.</p>
+
+          <div class="star-selector" id="starSelector">
+            <span data-star="1">★</span>
+            <span data-star="2">★</span>
+            <span data-star="3">★</span>
+            <span data-star="4">★</span>
+            <span data-star="5" class="selected">★</span>
+          </div>
+          <input type="hidden" id="selectedRating" value="5" />
+
+          <div class="form-group" style="text-align: left; margin-top: 16px;">
+            <label class="form-label">Written Feedback</label>
+            <textarea id="rateComment" class="form-control" placeholder="Share details about punctuality, driving smoothness, navigation, etc..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('rateDriverModal')">Cancel</button>
+          <button type="submit" id="btnSubmitReview" class="btn btn-primary">Submit Rating</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/cities-data.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/notifications.js"></script>
+  <script src="/js/city-autocomplete.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let myCarsList = [];
+    let myJobsList = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!requireAuth(['owner'])) return;
+
+      // Initialize searchable city autocompletes for Post Job modal
+      initCityAutocomplete({
+        inputId: 'jobPickupCity',
+        stateInputId: 'jobPickupState',
+        latInputId: 'jobPickupLat',
+        lngInputId: 'jobPickupLng',
+        placeholder: 'Search Indian cities (e.g. Amravati, Pune, Nagpur)...'
+      });
+
+      initCityAutocomplete({
+        inputId: 'jobDestCity',
+        stateInputId: 'jobDestState',
+        latInputId: 'jobDestLat',
+        lngInputId: 'jobDestLng',
+        placeholder: 'Search Indian cities (e.g. Nagpur, Mumbai, Goa)...'
+      });
+
+      // Initialize "Use My Current Location" button for Pickup City
+      initLocationDetector({
+        buttonId: 'btnJobPickupLocation',
+        cityInputId: 'jobPickupCity',
+        areaInputId: 'jobPickupArea',
+        stateInputId: 'jobPickupState',
+        latInputId: 'jobPickupLat',
+        lngInputId: 'jobPickupLng',
+        statusTextId: 'jobPickupStatus'
+      });
+
+      // Set default job start date to tomorrow
+      const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+      document.getElementById('jobStartDate').value = tomorrow;
+
+      await loadDashboardData();
+      initStarRating();
+    });
+
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(tb => tb.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      el.classList.add('active');
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('show'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    function openAddCarModal() { openModal('addCarModal'); }
+
+    function openEditCarModal(id) {
+      const car = myCarsList.find(c => c._id === id);
+      if (!car) return;
+      document.getElementById('editCarId').value = car._id;
+      document.getElementById('editCarBrand').value = car.brand || '';
+      document.getElementById('editCarModel').value = car.model || '';
+      document.getElementById('editCarVariant').value = car.variant || '';
+      document.getElementById('editCarYear').value = car.year || new Date().getFullYear();
+      document.getElementById('editCarRegNo').value = car.registrationNumber || '';
+      document.getElementById('editCarTransmission').value = car.transmission || 'Manual';
+      document.getElementById('editCarFuel').value = car.fuelType || 'Petrol';
+      document.getElementById('editCarSeats').value = car.seatingCapacity || 5;
+      openModal('editCarModal');
+    }
+
+    function openPostJobModal() {
+      // Populate car select dropdown
+      const select = document.getElementById('jobCarSelect');
+      if (myCarsList.length === 0) {
+        select.innerHTML = '<option value="">No cars registered yet</option>';
+      } else {
+        select.innerHTML = myCarsList.map(c => `
+          <option value="${c._id}">${c.brand} ${c.model} (${c.transmission} - ${c.registrationNumber})</option>
+        `).join('');
+      }
+      openModal('postJobModal');
+    }
+
+    async function loadDashboardData() {
+      await Promise.all([
+        loadCars(),
+        loadJobs(),
+        loadBookings(),
+        loadAiRecs()
+      ]);
+      await loadApplications();
+    }
+
+    // 1. Load Cars
+    async function loadCars() {
+      try {
+        const data = await apiRequest('/cars');
+        myCarsList = data.cars || [];
+        document.getElementById('statCarsCount').innerText = myCarsList.length;
+        document.getElementById('badgeCars').innerText = myCarsList.length;
+
+        const grid = document.getElementById('carsGrid');
+        if (myCarsList.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+              <div class="empty-state-icon">🚗</div>
+              <h3>No Cars Registered</h3>
+              <p>Add your car details so professional drivers can see what vehicle they will be driving.</p>
+              <button class="btn btn-primary" onclick="openAddCarModal()" style="margin-top: 14px;">+ Add Your First Car</button>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = myCarsList.map(c => `
+          <div class="car-card">
+            <div class="car-card-header">
+              <span class="car-reg-badge">${escapeHtml(c.registrationNumber)}</span>
+              <span class="badge ${c.transmission === 'Automatic' ? 'badge-primary' : 'badge-secondary'}">
+                ${c.transmission}
+              </span>
+            </div>
+            <div class="car-card-body">
+              <div class="car-title">${escapeHtml(c.brand)} ${escapeHtml(c.model)}</div>
+              <div class="car-variant">${escapeHtml(c.variant || 'Standard')} • ${c.year}</div>
+              <div class="car-specs-grid">
+                <div class="car-spec-item">⛽ Fuel: <strong>${c.fuelType}</strong></div>
+                <div class="car-spec-item">💺 Seats: <strong>${c.seatingCapacity}</strong></div>
+              </div>
+            </div>
+            <div class="car-card-actions" style="display: flex; gap: 8px;">
+              <button class="btn btn-outline btn-sm" onclick="openEditCarModal('${c._id}')">
+                Edit
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="deleteCar('${c._id}')" style="color: var(--danger); border-color: #fee2e2;">
+                Delete
+              </button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // 2. Load Jobs
+    async function loadJobs() {
+      try {
+        const data = await apiRequest('/jobs/my');
+        myJobsList = data.jobs || [];
+        const openJobs = myJobsList.filter(j => j.status === 'open');
+        document.getElementById('statJobsCount').innerText = openJobs.length;
+        document.getElementById('badgeJobs').innerText = myJobsList.length;
+
+        const list = document.getElementById('jobsList');
+        if (myJobsList.length === 0) {
+          list.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <h3>No Job Postings Yet</h3>
+              <p>Post a driver requirement whenever you need someone to drive your car.</p>
+              <button class="btn btn-primary" onclick="openPostJobModal()" style="margin-top: 14px;">+ Post Driver Requirement</button>
+            </div>
+          `;
+          return;
+        }
+
+        list.innerHTML = myJobsList.map(j => `
+          <div class="card" style="margin-bottom: 16px; padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 12px;">
+              <div>
+                <span class="badge ${j.status === 'open' ? 'badge-success' : j.status === 'assigned' ? 'badge-primary' : 'badge-secondary'}">
+                  ${j.status.toUpperCase()}
+                </span>
+                <h3 style="font-size: 1.15rem; margin-top: 6px;">${escapeHtml(j.title)}</h3>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 2px;">
+                  Format: <strong>${j.jobType}</strong> • Car: <strong>${j.carId ? `${j.carId.brand} ${j.carId.model}` : 'Personal Vehicle'}</strong>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 1.25rem; font-weight: 800; color: var(--primary);">${formatCurrency(j.salary)}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">${j.salaryType}</div>
+              </div>
+            </div>
+
+            <p style="font-size: 0.88rem; color: #475569; margin-bottom: 14px;">${escapeHtml(j.description)}</p>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 14px; font-size: 0.85rem;">
+              <div>
+                📍 Pickup: <strong>${j.pickupLocation?.city || ''}${j.pickupLocation?.area ? `, ${j.pickupLocation?.area}` : ''}</strong>
+                ${j.destination?.city ? ` → <strong>${j.destination.city}</strong>` : ''}
+                • Date: <strong>${formatDate(j.startDate)}</strong>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <button class="btn btn-outline btn-sm" onclick="viewJobApplications('${j._id}')">
+                  View Applicants
+                </button>
+                ${j.status === 'open' ? `
+                  <button class="btn btn-outline btn-sm" onclick="cancelJob('${j._id}')" style="color: var(--danger);">
+                    Cancel Job
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // 3. Load Applications
+    async function loadApplications() {
+      try {
+        let allApps = [];
+        for (const j of myJobsList) {
+          const res = await apiRequest(`/applications/job/${j._id}`).catch(() => ({ applications: [] }));
+          if (res.applications && res.applications.length > 0) {
+            allApps.push(...res.applications.map(a => ({ ...a, jobTitle: j.title })));
+          }
+        }
+
+        document.getElementById('statAppsCount').innerText = allApps.filter(a => a.status === 'pending').length;
+        document.getElementById('badgeApps').innerText = allApps.length;
+
+        const container = document.getElementById('applicationsList');
+        if (allApps.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📨</div>
+              <h3>No Applications Received Yet</h3>
+              <p>When verified drivers apply for your posted jobs, their credentials and proposals will appear here.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = allApps.map(a => {
+          const d = a.driverId || {};
+          const isPending = a.status === 'pending';
+          return `
+            <div class="application-card">
+              <div class="application-header">
+                <div class="applicant-profile">
+                  <div class="applicant-avatar">${d.name ? d.name[0] : 'D'}</div>
+                  <div class="applicant-details">
+                    <h4>
+                      ${escapeHtml(d.name || 'Driver')}
+                      <span class="badge ${a.status === 'accepted' ? 'badge-success' : a.status === 'rejected' ? 'badge-danger' : 'badge-warning'}">
+                        ${a.status.toUpperCase()}
+                      </span>
+                    </h4>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">
+                      For: <strong>${escapeHtml(a.jobTitle)}</strong> • License: <strong>${d.licenseType || 'LMV'}</strong> • Exp: <strong>${d.experience || 0} yrs</strong>
+                    </div>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <span class="star-rating">★ ${d.rating?.toFixed(1) || '5.0'}</span>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">(${d.totalReviews || 0} reviews)</div>
+                </div>
+              </div>
+
+              ${a.message ? `
+                <div class="application-message-box">
+                  "${escapeHtml(a.message)}"
+                </div>
+              ` : ''}
+
+              <div class="application-footer">
+                <div class="application-salary">
+                  Proposed Rate: <strong>${formatCurrency(a.expectedSalary || 0)}</strong>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                  ${isPending ? `
+                    <button class="btn btn-outline btn-sm" onclick="rejectApplication('${a._id}')" style="color: var(--danger);">
+                      Decline
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="acceptApplication('${a._id}')">
+                      ✓ Hire Driver & Confirm Booking
+                    </button>
+                  ` : `
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">
+                      Status: ${a.status}
+                    </span>
+                  `}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // 4. Load Bookings
+    async function loadBookings() {
+      try {
+        const data = await apiRequest('/bookings');
+        const bookings = data.bookings || [];
+        const upcomingCount = bookings.filter(b => b.status === 'upcoming' || b.status === 'active').length;
+        document.getElementById('statBookingsCount').innerText = upcomingCount;
+        document.getElementById('badgeBookings').innerText = bookings.length;
+
+        const list = document.getElementById('bookingsList');
+        if (bookings.length === 0) {
+          list.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🤝</div>
+              <h3>No Bookings Yet</h3>
+              <p>Once you accept a driver application, a confirmed booking will appear here.</p>
+            </div>
+          `;
+          return;
+        }
+
+        list.innerHTML = bookings.map(b => {
+          const d = b.driverId || {};
+          const isUpcoming = b.status === 'upcoming' || b.status === 'active';
+          const isCompleted = b.status === 'completed';
+
+          return `
+            <div class="booking-card">
+              <div class="booking-header">
+                <div class="booking-title">${escapeHtml(b.jobId?.title || 'Personal Driver Booking')}</div>
+                <span class="badge ${isCompleted ? 'badge-success' : b.status === 'cancelled' ? 'badge-danger' : 'badge-primary'}">
+                  ${b.status.toUpperCase()}
+                </span>
+              </div>
+
+              <div class="booking-route">
+                <span>📍 <strong>${b.pickupLocation?.city || 'Pune'}</strong> (${b.pickupLocation?.area || 'Area'})</span>
+                ${b.destination?.city ? `<span class="route-arrow">➔</span> <span>📍 <strong>${b.destination.city}</strong></span>` : ''}
+                <span style="margin-left: auto; color: var(--text-muted); font-size: 0.85rem;">
+                  📅 ${formatDate(b.startDate)}
+                </span>
+              </div>
+
+              <div class="booking-parties">
+                <div class="party-box">
+                  <div class="user-avatar" style="width: 40px; height: 40px;">${d.name ? d.name[0] : 'D'}</div>
+                  <div>
+                    <div style="font-weight: 700;">${escapeHtml(d.name || 'Assigned Driver')}</div>
+                    <div style="color: var(--text-muted); font-size: 0.8rem;">📞 ${escapeHtml(d.phone || 'Contact provided on hire')}</div>
+                  </div>
+                </div>
+                <div class="party-box">
+                  <div>🚗 <strong>${b.carId ? `${b.carId.brand} ${b.carId.model}` : 'Owner Car'}</strong></div>
+                </div>
+                <div class="party-box" style="justify-content: flex-end;">
+                  <div>Agreed: <strong style="font-size: 1.15rem; color: var(--primary);">${formatCurrency(b.agreedAmount)}</strong></div>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border); padding-top: 14px;">
+                ${isUpcoming ? `
+                  <button class="btn btn-outline btn-sm" onclick="updateBookingStatus('${b._id}', 'cancelled')" style="color: var(--danger);">
+                    Cancel Booking
+                  </button>
+                  <button class="btn btn-success btn-sm" onclick="updateBookingStatus('${b._id}', 'completed')">
+                    ✓ Mark Completed
+                  </button>
+                ` : isCompleted ? `
+                  <button class="btn btn-primary btn-sm" onclick="openRateModal('${b._id}', '${escapeHtml(d.name)}')">
+                    ⭐ Rate Driver
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // 5. Load AI Recommended Drivers
+    async function loadAiRecs() {
+      try {
+        const data = await apiRequest('/drivers/recommended?limit=6');
+        const grid = document.getElementById('aiRecsGrid');
+        if (!data.success || !data.recommendations || data.recommendations.length === 0) {
+          grid.innerHTML = '<div class="empty-state"><p>No driver recommendations available.</p></div>';
+          return;
+        }
+
+        grid.innerHTML = data.recommendations.slice(0, 6).map(r => {
+          const d = r.driver;
+          return `
+            <div class="driver-card ai-matched">
+              <div class="ai-match-badge">
+                ⚡ ${r.matchScore}% Match
+              </div>
+
+              <div class="driver-card-header">
+                ${d.profileImage ? `
+                  <img src="${d.profileImage}" alt="${d.name}" class="driver-avatar" />
+                ` : `
+                  <div class="driver-avatar">${d.name[0]}</div>
+                `}
+                <div class="driver-summary">
+                  <div class="driver-name">${escapeHtml(d.name)}</div>
+                  <div class="driver-location">📍 ${d.location?.city || 'Pune'}, ${d.location?.area || 'Area'}</div>
+                  <div class="driver-meta-row">
+                    <span class="star-rating">★ ${d.rating?.toFixed(1) || '5.0'}</span>
+                    <span style="color: var(--text-muted);">(${d.totalReviews || 0} reviews)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="driver-card-body">
+                <div class="ai-reasons-box">
+                  <div class="ai-reasons-title">💡 Why AI recommends ${escapeHtml(d.name.split(' ')[0])}:</div>
+                  <ul class="ai-reasons-list">
+                    ${r.reasons.map(reason => `
+                      <li>✓ ${escapeHtml(reason)}</li>
+                    `).join('')}
+                  </ul>
+                </div>
+
+                <div class="spec-pills" style="margin-top: 8px;">
+                  <div class="spec-pill">Exp: <strong>${d.experience || 0} yrs</strong></div>
+                  <div class="spec-pill">License: <strong>${d.licenseType || 'LMV'}</strong></div>
+                  <div class="spec-pill">Status: <strong style="color: var(--success);">${d.availability || 'Available'}</strong></div>
+                </div>
+              </div>
+
+              <div class="driver-card-footer">
+                <div class="driver-rate">
+                  <strong>${formatCurrency(d.expectedSalary || 1500)}</strong> / ${d.salaryType || 'Day'}
+                </div>
+                <a href="/drivers.html?driverId=${d._id}" class="btn btn-primary btn-sm">View Profile</a>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Forms handling
+    document.getElementById('addCarForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const payload = {
+          brand: document.getElementById('carBrand').value.trim(),
+          model: document.getElementById('carModel').value.trim(),
+          variant: document.getElementById('carVariant').value.trim(),
+          year: Number(document.getElementById('carYear').value),
+          registrationNumber: document.getElementById('carRegNo').value.trim(),
+          transmission: document.getElementById('carTransmission').value,
+          fuelType: document.getElementById('carFuel').value,
+          seatingCapacity: Number(document.getElementById('carSeats').value)
+        };
+
+        const res = await apiRequest('/cars', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        showToast(res.message, 'success');
+        closeModal('addCarModal');
+        document.getElementById('addCarForm').reset();
+        await loadCars();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
+    document.getElementById('editCarForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const carId = document.getElementById('editCarId').value;
+        const payload = {
+          brand: document.getElementById('editCarBrand').value.trim(),
+          model: document.getElementById('editCarModel').value.trim(),
+          variant: document.getElementById('editCarVariant').value.trim(),
+          year: Number(document.getElementById('editCarYear').value),
+          registrationNumber: document.getElementById('editCarRegNo').value.trim(),
+          transmission: document.getElementById('editCarTransmission').value,
+          fuelType: document.getElementById('editCarFuel').value,
+          seatingCapacity: Number(document.getElementById('editCarSeats').value)
+        };
+
+        const res = await apiRequest(`/cars/${carId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+
+        showToast(res.message || 'Vehicle details updated successfully!', 'success');
+        closeModal('editCarModal');
+        await loadCars();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
+    document.getElementById('postJobForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const pickupLat = parseFloat(document.getElementById('jobPickupLat').value);
+        const pickupLng = parseFloat(document.getElementById('jobPickupLng').value);
+        const destLat = parseFloat(document.getElementById('jobDestLat').value);
+        const destLng = parseFloat(document.getElementById('jobDestLng').value);
+
+        const payload = {
+          title: document.getElementById('jobTitle').value.trim(),
+          carId: document.getElementById('jobCarSelect').value || undefined,
+          jobType: document.getElementById('jobType').value,
+          description: document.getElementById('jobDesc').value.trim(),
+          pickupLocation: {
+            city: document.getElementById('jobPickupCity').value.trim(),
+            area: document.getElementById('jobPickupArea').value.trim(),
+            state: document.getElementById('jobPickupState').value.trim() || undefined,
+            latitude: !isNaN(pickupLat) ? pickupLat : undefined,
+            longitude: !isNaN(pickupLng) ? pickupLng : undefined
+          },
+          destination: {
+            city: document.getElementById('jobDestCity').value.trim(),
+            area: document.getElementById('jobDestArea').value.trim(),
+            state: document.getElementById('jobDestState').value.trim() || undefined,
+            latitude: !isNaN(destLat) ? destLat : undefined,
+            longitude: !isNaN(destLng) ? destLng : undefined
+          },
+          startDate: document.getElementById('jobStartDate').value,
+          endDate: document.getElementById('jobEndDate').value || undefined,
+          salary: Number(document.getElementById('jobSalary').value),
+          salaryType: document.getElementById('jobSalaryType').value,
+          requiredExperience: Number(document.getElementById('jobReqExp').value) || 0,
+          requiredLicenseType: document.getElementById('jobReqLicense') ? document.getElementById('jobReqLicense').value : 'LMV',
+          workingHours: document.getElementById('jobWorkingHours') ? document.getElementById('jobWorkingHours').value.trim() : 'Flexible'
+        };
+
+        const res = await apiRequest('/jobs', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        showToast('Driver requirement posted successfully!', 'success');
+        closeModal('postJobModal');
+        document.getElementById('postJobForm').reset();
+        await loadJobs();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    });
+
+    async function cancelJob(id) {
+      if (!confirm('Are you sure you want to cancel this job posting?')) return;
+      try {
+        const res = await apiRequest(`/jobs/${id}`, { method: 'DELETE' });
+        showToast(res.message || 'Job cancelled successfully', 'info');
+        await loadJobs();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function deleteCar(id) {
+      if (!confirm('Are you sure you want to remove this vehicle?')) return;
+      try {
+        await apiRequest(`/cars/${id}`, { method: 'DELETE' });
+        showToast('Car removed', 'info');
+        await loadCars();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function acceptApplication(appId) {
+      if (!confirm('Accept this driver and confirm the booking?')) return;
+      try {
+        const res = await apiRequest(`/applications/${appId}/accept`, { method: 'PUT' });
+        showToast(res.message, 'success');
+        await loadDashboardData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function rejectApplication(appId) {
+      try {
+        await apiRequest(`/applications/${appId}/reject`, { method: 'PUT' });
+        showToast('Application declined', 'info');
+        await loadApplications();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function updateBookingStatus(id, status) {
+      if (!confirm(`Are you sure you want to update this booking to '${status}'?`)) return;
+      try {
+        const res = await apiRequest(`/bookings/${id}/status`, {
+          method: 'PUT',
+          body: JSON.stringify({ status })
+        });
+        showToast(res.message, 'success');
+        await loadBookings();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function openRateModal(bookingId, driverName) {
+      document.getElementById('rateBookingId').value = bookingId;
+      document.getElementById('rateDriverName').innerText = driverName;
+      openModal('rateDriverModal');
+    }
+
+    function initStarRating() {
+      const stars = document.querySelectorAll('#starSelector span');
+      stars.forEach(star => {
+        star.addEventListener('click', () => {
+          const val = Number(star.getAttribute('data-star'));
+          document.getElementById('selectedRating').value = val;
+          stars.forEach(s => {
+            const sVal = Number(s.getAttribute('data-star'));
+            if (sVal <= val) {
+              s.classList.add('selected');
+            } else {
+              s.classList.remove('selected');
+            }
+          });
+        });
+      });
+
+      document.getElementById('rateDriverForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+          const bookingId = document.getElementById('rateBookingId').value;
+          const rating = Number(document.getElementById('selectedRating').value);
+          const comment = document.getElementById('rateComment').value.trim();
+
+          const res = await apiRequest('/reviews', {
+            method: 'POST',
+            body: JSON.stringify({ bookingId, rating, comment })
+          });
+
+          showToast(res.message, 'success');
+          closeModal('rateDriverModal');
+          document.getElementById('rateDriverForm').reset();
+          await loadBookings();
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      });
+    }
+
+    function viewJobApplications(jobId) {
+      switchTab('tabApplications', document.querySelectorAll('.tab-btn')[2]);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - LET ME DRIVE</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <style>
+    .auth-page {
+      min-height: calc(100vh - 72px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .auth-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      max-width: 440px;
+      width: 100%;
+      padding: 36px 32px;
+    }
+    .auth-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .auth-header h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--secondary);
+    }
+    .auth-header p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+    .demo-box {
+      background: #f8fafc;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 24px;
+      font-size: 0.82rem;
+    }
+    .demo-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .demo-btn {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--primary);
+      cursor: pointer;
+    }
+    .demo-btn:hover {
+      background: var(--primary-light);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container navbar-container">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">🚘</div>
+        <span>LET ME DRIVE</span>
+      </a>
+      <div class="nav-auth" id="navAuth"></div>
+    </div>
+  </header>
+
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h2>Welcome Back</h2>
+        <p>Log in to your Car Owner or Driver account</p>
+      </div>
+
+      <!-- Quick Demo Account Fillers for College Evaluator -->
+      <div class="demo-box">
+        <strong style="color: var(--secondary);">⚡ College Demo Quick-Fill:</strong>
+        <div class="demo-btns">
+          <button type="button" class="demo-btn" onclick="fillDemo('owner.rahul@example.com')">
+            🚗 Car Owner (Rahul)
+          </button>
+          <button type="button" class="demo-btn" onclick="fillDemo('driver.ramesh@example.com')">
+            💼 Driver (Ramesh - Pune)
+          </button>
+          <button type="button" class="demo-btn" onclick="fillDemo('driver.sachin@example.com')">
+            💼 Driver (Sachin - Mumbai)
+          </button>
+        </div>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            class="form-control"
+            placeholder="you@example.com"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            class="form-control"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-primary btn-block btn-lg" style="margin-top: 10px;">
+          Log In
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 24px; font-size: 0.9rem; color: var(--text-muted);">
+        Don't have an account yet?
+        <a href="/register.html" style="font-weight: 600;">Register Now</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    function fillDemo(email) {
+      document.getElementById('email').value = email;
+      document.getElementById('password').value = 'Password@123';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Logging in...';
+
+        const data = await apiRequest('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email, password })
+        });
+
+        if (data.success && data.token) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          showToast('Welcome back, ' + data.user.name + '!', 'success');
+
+          setTimeout(() => {
+            if (data.user.role === 'owner') {
+              window.location.href = '/owner-dashboard.html';
+            } else {
+              window.location.href = '/driver-dashboard.html';
+            }
+          }, 600);
+        }
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Log In';
+      }
+    });
+  </script>
+</body>
+</html>

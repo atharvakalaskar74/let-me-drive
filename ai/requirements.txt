@@ -1,0 +1,4 @@
+# LET ME DRIVE - AI Module Dependencies
+# The recommendation engine uses standard Python math & json modules.
+# Compatible with Python 3.9+ without paid or heavy external packages.
+numpy>=1.20.0

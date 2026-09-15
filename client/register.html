@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register - LET ME DRIVE</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <style>
+    .auth-page {
+      min-height: calc(100vh - 72px);
+      padding: 40px 20px 80px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .register-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      max-width: 680px;
+      width: 100%;
+      padding: 36px;
+    }
+    .role-toggle-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 20px 0 28px;
+    }
+    .role-toggle-btn {
+      padding: 16px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      background: white;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      color: var(--secondary);
+      transition: var(--transition);
+    }
+    .role-toggle-btn.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .role-toggle-btn span {
+      font-size: 1.6rem;
+    }
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container navbar-container">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">🚘</div>
+        <span>LET ME DRIVE</span>
+      </a>
+      <div class="nav-auth" id="navAuth"></div>
+    </div>
+  </header>
+
+  <div class="auth-page">
+    <div class="register-card">
+      <div style="text-align: center;">
+        <h2 style="font-size: 1.7rem; font-weight: 800;">Create Your Account</h2>
+        <p style="color: var(--text-muted); font-size: 0.92rem; margin-top: 4px;">
+          Choose your role to get started on Let Me Drive
+        </p>
+      </div>
+
+      <!-- Role Selector -->
+      <div class="role-toggle-group">
+        <button type="button" class="role-toggle-btn active" id="btnRoleOwner" onclick="selectRole('owner')">
+          <span>🚗</span>
+          <div>I am a Car Owner</div>
+          <small style="font-weight: 400; font-size: 0.75rem; color: var(--text-muted);">I need a driver for my car</small>
+        </button>
+
+        <button type="button" class="role-toggle-btn" id="btnRoleDriver" onclick="selectRole('driver')">
+          <span>💼</span>
+          <div>I am a Driver</div>
+          <small style="font-weight: 400; font-size: 0.75rem; color: var(--text-muted);">I want to drive for car owners</small>
+        </button>
+      </div>
+
+      <form id="registerForm">
+        <!-- Common Details -->
+        <h4 style="font-size: 0.95rem; margin-bottom: 16px; color: var(--secondary); border-bottom: 1px solid var(--border); padding-bottom: 6px;">
+          1. Basic Personal Information
+        </h4>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="name">Full Name *</label>
+            <input type="text" id="name" class="form-control" placeholder="e.g. Rahul Sharma" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address *</label>
+            <input type="email" id="email" class="form-control" placeholder="e.g. rahul@example.com" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="password">Password (min 6 chars) *</label>
+            <input type="password" id="password" class="form-control" placeholder="••••••••" minlength="6" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="phone">Contact Phone *</label>
+            <input type="tel" id="phone" class="form-control" placeholder="e.g. +91 98230 11223" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="age">Age</label>
+            <input type="number" id="age" class="form-control" placeholder="e.g. 32" min="18" max="75" />
+          </div>
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label class="form-label" for="city" style="margin-bottom: 0;">City *</label>
+              <button type="button" class="btn-current-location" id="btnRegisterLocation" title="Detect city and state from your current GPS">
+                📍 Use My Current Location
+              </button>
+            </div>
+            <input type="text" id="city" class="form-control" placeholder="Search Indian cities (e.g. Amravati, Pune, Nagpur)..." required autocomplete="off" />
+            <input type="hidden" id="regLat" />
+            <input type="hidden" id="regLng" />
+            <div id="regLocationStatus" style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px;"></div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="area">Area / Neighbourhood</label>
+            <input type="text" id="area" class="form-control" placeholder="e.g. Kothrud, Bandra, Koramangala" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="state">State</label>
+            <input type="text" id="state" class="form-control" placeholder="e.g. Maharashtra, Karnataka" />
+          </div>
+        </div>
+
+        <!-- Driver Specific Section -->
+        <div id="driverSpecificSection" style="display: none; margin-top: 24px;">
+          <h4 style="font-size: 0.95rem; margin-bottom: 16px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 6px;">
+            2. Professional Driver Credentials
+          </h4>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="licenseNumber">Driving License Number *</label>
+              <input type="text" id="licenseNumber" class="form-control" placeholder="e.g. MH12 2018001234" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="licenseType">License Category *</label>
+              <select id="licenseType" class="form-select">
+                <option value="LMV">LMV (Light Motor Vehicle - Cars/SUVs)</option>
+                <option value="Commercial">Commercial (Yellow Badge)</option>
+                <option value="HMV">HMV (Heavy Motor Vehicle)</option>
+                <option value="Automatic Only">Automatic Transmission Only</option>
+                <option value="All">All Categories</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="experience">Driving Experience (Years) *</label>
+              <input type="number" id="experience" class="form-control" placeholder="e.g. 5" min="0" max="50" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="expectedSalary">Expected Rate (₹)</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="number" id="expectedSalary" class="form-control" placeholder="e.g. 1500" min="0" />
+                <select id="salaryType" class="form-select" style="max-width: 110px;">
+                  <option value="Daily">Daily</option>
+                  <option value="Hourly">Hourly</option>
+                  <option value="Monthly">Monthly</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Specialized Driving Skills</label>
+            <div class="checkbox-grid">
+              <label class="checkbox-item"><input type="checkbox" name="skills" value="Automatic Transmission" checked /> Automatic Cars</label>
+              <label class="checkbox-item"><input type="checkbox" name="skills" value="Manual Transmission" checked /> Manual Cars</label>
+              <label class="checkbox-item"><input type="checkbox" name="skills" value="Luxury Cars" /> Luxury Cars</label>
+              <label class="checkbox-item"><input type="checkbox" name="skills" value="Night Driving" checked /> Night Driving</label>
+              <label class="checkbox-item"><input type="checkbox" name="skills" value="Hill Driving" /> Hill / Ghat Driving</label>
+              <label class="checkbox-item"><input type="checkbox" name="skills" value="Outstation" checked /> Outstation Travel</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Preferred Job Types</label>
+            <div class="checkbox-grid">
+              <label class="checkbox-item"><input type="checkbox" name="jobTypes" value="Outstation" checked /> Outstation</label>
+              <label class="checkbox-item"><input type="checkbox" name="jobTypes" value="One Day" checked /> One Day</label>
+              <label class="checkbox-item"><input type="checkbox" name="jobTypes" value="Hourly" checked /> Hourly</label>
+              <label class="checkbox-item"><input type="checkbox" name="jobTypes" value="Temporary" checked /> Temporary</label>
+              <label class="checkbox-item"><input type="checkbox" name="jobTypes" value="Permanent" /> Permanent</label>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" id="regSubmitBtn" class="btn btn-primary btn-block btn-lg" style="margin-top: 24px;">
+          Create My Account
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 20px; font-size: 0.9rem; color: var(--text-muted);">
+        Already registered? <a href="/login.html" style="font-weight: 600;">Log In here</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/cities-data.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/city-autocomplete.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let currentRole = 'owner';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize searchable city autocomplete with Pan-India cities
+      initCityAutocomplete({
+        inputId: 'city',
+        stateInputId: 'state',
+        latInputId: 'regLat',
+        lngInputId: 'regLng',
+        placeholder: 'Search Indian cities (e.g. Amravati, Pune, Nagpur)...'
+      });
+
+      // Initialize native browser "Use My Current Location" button
+      initLocationDetector({
+        buttonId: 'btnRegisterLocation',
+        cityInputId: 'city',
+        areaInputId: 'area',
+        stateInputId: 'state',
+        latInputId: 'regLat',
+        lngInputId: 'regLng',
+        statusTextId: 'regLocationStatus'
+      });
+    });
+
+    // Check url params for default role
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('role') === 'driver') {
+      selectRole('driver');
+    }
+
+    function selectRole(role) {
+      currentRole = role;
+      const btnOwner = document.getElementById('btnRoleOwner');
+      const btnDriver = document.getElementById('btnRoleDriver');
+      const driverSection = document.getElementById('driverSpecificSection');
+      const licenseInput = document.getElementById('licenseNumber');
+
+      if (role === 'owner') {
+        btnOwner.classList.add('active');
+        btnDriver.classList.remove('active');
+        driverSection.style.display = 'none';
+        licenseInput.removeAttribute('required');
+      } else {
+        btnDriver.classList.add('active');
+        btnOwner.classList.remove('active');
+        driverSection.style.display = 'block';
+        licenseInput.setAttribute('required', 'required');
+      }
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('regSubmitBtn');
+
+      const regLat = document.getElementById('regLat').value;
+      const regLng = document.getElementById('regLng').value;
+
+      const payload = {
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        password: document.getElementById('password').value,
+        phone: document.getElementById('phone').value.trim(),
+        age: document.getElementById('age').value || undefined,
+        role: currentRole,
+        location: {
+          city: document.getElementById('city').value.trim(),
+          area: document.getElementById('area').value.trim(),
+          state: document.getElementById('state').value.trim(),
+          latitude: regLat ? Number(regLat) : undefined,
+          longitude: regLng ? Number(regLng) : undefined
+        }
+      };
+
+      if (currentRole === 'driver') {
+        payload.licenseNumber = document.getElementById('licenseNumber').value.trim();
+        payload.licenseType = document.getElementById('licenseType').value;
+        payload.experience = Number(document.getElementById('experience').value) || 0;
+        payload.expectedSalary = Number(document.getElementById('expectedSalary').value) || 0;
+        payload.salaryType = document.getElementById('salaryType').value;
+
+        // Skills checkboxes
+        const skillEls = document.querySelectorAll('input[name="skills"]:checked');
+        payload.skills = Array.from(skillEls).map(el => el.value);
+
+        // Job types checkboxes
+        const jobTypeEls = document.querySelectorAll('input[name="jobTypes"]:checked');
+        payload.preferredJobTypes = Array.from(jobTypeEls).map(el => el.value);
+      }
+
+      try {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Creating account...';
+
+        const data = await apiRequest('/auth/register', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        if (data.success && data.token) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          showToast('Account created successfully!', 'success');
+
+          setTimeout(() => {
+            if (currentRole === 'owner') {
+              window.location.href = '/owner-dashboard.html';
+            } else {
+              window.location.href = '/driver-dashboard.html';
+            }
+          }, 600);
+        }
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Create My Account';
+      }
+    });
+  </script>
+</body>
+</html>
